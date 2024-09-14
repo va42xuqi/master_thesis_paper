@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results for SOC on pretrained with 1 player.}
+\label{pre:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.10 & 0.89 & 0.92 & 0.99 & 0.97 & 1.00 \\
+MSE (m) & 4.01 & 2.69 & 2.84 & 3.29 & 3.20 & 3.38 \\
+ADE (m) & 1.73 & 1.40 & 1.44 & 1.56 & 1.53 & 1.57 \\
+FDE (m) & 4.23 & 3.71 & 3.78 & 3.95 & 4.07 & 4.01 \\
+NL\_ADE (m) & 1.99 & 1.66 & 1.69 & 1.83 & 1.78 & 1.85 \\
+AAE (grad) & 41.67 & 36.97 & 37.35 & 39.41 & 40.65 & 38.49 \\
+FAE (grad) & 66.10 & 61.49 & 61.60 & 63.25 & 70.21 & 61.11 \\
+\end{tabular}
+\end{table}

@@ -1,0 +1,26 @@
+\section{Research Questions}
+
+Building on the challenges outlined in the problem statement, this research seeks to systematically investigate the factors that influence the accuracy and effectiveness of human motion forecasting models in dynamic environments. To achieve the primary objective of identifying the most effective model, the study is guided by the following research questions:
+
+\todo{maybe add another question: How does the (multivariate) models compare in general to each other (with full input)? (suitable for experiment 1)}
+
+\begin{itemize}
+    \item[\textbf{Q1}] \textbf{How does the model's performance vary when using only positional data, only velocity data, or both positional and velocity data?} \\
+    This question investigates how the model's performance changes based on the type of input data. It aims to determine whether using only positional data, only velocity data, or both types of data leads to different levels of accuracy and robustness in predictions. Understanding these effects is essential for assessing which input configurations enhance model performance and how each model benefits or suffers from different input structures.
+    
+    \item[\textbf{Q2}] \textbf{What is the effect of varying the length of historical context and forecast horizon on the model's accuracy?} \\ 
+    This question explores how varying the length of historical context (the amount of past data) and the forecast horizon (the duration of future predictions) impacts the model's accuracy. It aims to determine which combinations of context and horizon lengths lead to optimal performance and how adjustments to these parameters influence the model's forecasting capabilities. Understanding these effects is crucial for identifying the best settings for accurate and reliable predictions.
+
+    \item[\textbf{Q3}] \textbf{How does a multivariate predictor compare to multiple univariate predictors in terms of forecasting accuracy?} \\
+    This question examines how a multivariate model, which predicts multiple variables such as x and y coordinates simultaneously, compares to separate univariate models that predict each variable independently. It seeks to determine which approach provides better forecasting accuracy and how integrating multiple variables in a single model affects performance compared to handling each variable individually. Understanding this comparison is important for evaluating the benefits of using a unified model versus multiple specialized models.
+    
+    \item[\textbf{Q4}] \textbf{What are the outcomes when training the model on Team A and testing the model on Team A versus training it on Team A and testing it on Team B?} \\
+    This question evaluates how the model’s performance is affected by training and testing on data from the same team (intra-team) compared to training on data from one team and testing on data from a different team (inter-team). It aims to assess the model's ability to generalize across different team environments and understand how well it performs when applied to new or unseen team data.
+
+    \item[\textbf{Q5}] \textbf{How does transfer learning impact model performance when trained on one domain and fine-tuned on another?} \\
+    This question investigates the effectiveness of transfer learning by training the model in one domain and then fine-tuning it for a different domain. It explores whether transfer learning improves the model's ability to generalize and its accuracy when applied to different domains, assessing the benefits and limitations of leveraging knowledge from one domain to enhance performance in another.
+
+    \item[\textbf{Q6}] \textbf{How does the model's performance differ when predicting the movement of a single target player using only that player’s data compared to using data from all players?} \\
+    This question explores how the accuracy and robustness of the model’s predictions for a single target player’s movement are influenced by using only that player’s data versus incorporating data from all players. It aims to determine whether leveraging the entire team's data provides a significant advantage in predicting the target player’s movement compared to using data from just the target player.
+
+\end{itemize}

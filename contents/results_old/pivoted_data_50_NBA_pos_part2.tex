@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\caption{Results for NBA using position only (Part 2).}
+\label{pos:NBA2}
+\begin{tabular}{l||c|c|c}
+Metric & Transformer & 1L linear & 2L linear \\
+\hline \hline
+MAE (m) & \textbf{1.16 \pm 0.74} & 1.63 \pm 1.09 & 1.59 \pm 1.06 \\
+MSE (m) & 3.45 \pm 5.28 & 6.43 \pm 9.08 & 6.21 \pm 8.46 \\
+ADE (m) & 1.84 \pm 1.20 & 2.59 \pm 1.74 & 2.54 \pm 1.71 \\
+FDE (m) & \textbf{3.65} \pm 2.57 & 4.67 \pm 3.30 & 4.56 \pm 3.22 \\
+NL\_ADE (m) & 2.31 \pm 1.57 & 3.03 \pm 2.11 & 3.02 \pm 2.07 \\
+AAE (grad) & \textbf{55.54 \pm 50.38} & 70.81 \pm 52.29 & 65.79 \pm 51.88 \\
+FAE (grad) & \textbf{66.52 \pm 53.54} & 76.42 \pm 52.63 & 69.18 \pm 54.48 \\
+\end{tabular}
+\end{table}

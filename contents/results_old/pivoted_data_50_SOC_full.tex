@@ -1,0 +1,22 @@
+\begin{table}[H]
+\centering
+\caption{Results for SOC on history length of 2.0s.}
+\label{hist:SOC_2.0s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline
+MAE (m) & 1.07 & 0.91 & 2.26 & 0.94 \\
+MSE (m) & 3.72 & 2.56 & 12.29 & 2.92 \\
+ADE (m) & 1.69 & 1.43 & 3.59 & 1.48 \\
+Disp. Err. 1s (m) & 0.52 & 0.38 & 1.88 & 0.37 \\
+Disp. Err. 2s (m) & 1.49 & 1.18 & 3.65 & 1.26 \\
+Disp. Err. 3s (m) & 2.73 & 2.33 & 5.27 & 2.45 \\
+Disp. Err. 4s (m) & 4.07 & 3.62 & 6.76 & 3.74 \\
+NL\_ADE (m) & 1.92 & 1.63 & 3.72 & 1.74 \\
+AAE (grad) & 39.81 & 36.87 & 81.18 & 37.11 \\
+Ang. Err. 1s (grad) & 26.36 & 21.20 & 83.08 & 22.92 \\
+Ang. Err. 2s (grad) & 42.40 & 37.82 & 80.79 & 39.53 \\
+Ang. Err. 3s (grad) & 53.29 & 50.99 & 80.79 & 50.99 \\
+Ang. Err. 4s (grad) & 62.45 & 60.73 & 80.79 & 59.59 \\
+\end{tabular}
+\end{table}

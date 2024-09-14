@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results for SOC, tested on other team.}
+\label{other_team:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & 1L linear & 2L linear & Transformer \\
+\hline\hline
+MAE (m) & 1.15 & 0.91 & 2.33 & 1.21 & 1.20 & 0.96 \\
+MSE (m) & 4.12 & 2.64 & 12.80 & 4.15 & 4.07 & 3.04 \\
+ADE (m) & 1.80 & 1.43 & 3.68 & 1.91 & 1.89 & 1.51 \\
+FDE (m) & 4.30 & 3.65 & 6.93 & 4.67 & 4.35 & 3.76 \\
+NL\_ADE (m) & 2.00 & 1.64 & 3.82 & 2.01 & 2.02 & 1.76 \\
+AAE (grad) & 42.58 & 37.50 & 88.98 & 56.78 & 43.96 & 37.57 \\
+FAE (grad) & 66.28 & 60.93 & 89.14 & 78.14 & 64.68 & 60.17 \\
+\end{tabular}
+\end{table}

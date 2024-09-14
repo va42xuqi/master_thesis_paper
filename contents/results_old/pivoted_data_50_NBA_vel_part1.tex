@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results for NBA  using velocity only input.}
+\label{vel:NBA1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline \hline
+MAE (m) & 1.34 & 1.15 & 1.14 & \textbf{1.13} & 1.24 & 1.22\\
+MSE (m) & 4.72 & 3.73 & 3.70 & \textbf{3.63} & 4.35 & 4.21 \\
+ADE (m) & 2.13 & 1.83 & 1.81 & \textbf{1.79} & 1.98 & 1.94 \\
+FDE (m) & 4.29 & 3.90  & 3.83 & \textbf{3.82} & 4.24 & 4.16 \\
+NL\_ADE (m) & 2.65 & 2.37 & 2.37 & \textbf{2.37} & 2.53 & 2.53 \\
+AAE (grad) & 66.20 & 60.63 & 61.17 & \textbf{59.64} & 63.13 & 62.57 \\
+FAE (grad) & 76.73 & 75.75 & 76.24 & \textbf{73.98} & 78.22 & 77.09 \\
+
+\end{tabular}
+\end{table}

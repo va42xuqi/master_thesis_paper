@@ -1,0 +1,134 @@
+\chapter{Methods}
+\label{chapt:method}
+
+This chapter outlines the methods and processes used to develop and evaluate the predictive models for player and ball movements in sports data. Section \ref{sec:idea_pipeline} introduces the overarching idea and the pipeline employed, setting the stage for the modeling approach. Section \ref{sec:preprocessing} details the data pre-processing techniques essential for preparing the raw input data for model training. Sections \ref{sec:main_proc} and \ref{sec:postprocessing} then delve into the specific models and post-processing techniques used to convert the model outputs into meaningful, real-world predictions.
+
+\section{Idea and Pipeline}
+\label{sec:idea_pipeline}
+\todo{better visual illustration}
+The primary goal of this thesis is to develop a robust pipeline for forecasting player movements in dynamic sports environments, such as basketball and soccer, where traditional methods like \glspl{kf} and \glspl{pf} often fall short due to the complexity and nonlinearity of the data. This research addresses these challenges by leveraging advanced \glspl{nn} that excel in capturing temporal dependencies and complex patterns in multivariate time series data.
+
+The proposed pipeline is structured into three main stages:
+\begin{itemize}
+    \item \textbf{Pre-processing:} Transform and segment raw data for model training, deciding whether to use data from all players, a single target, or both.
+    \item \textbf{Main-processing:} Feed preprocessed data into various neural networks, including LSTM, LMU, Transformers, and BitNet, to handle different aspects of trajectory prediction.
+    \item \textbf{Post-processing:} Convert predicted velocities back to positional data for practical applications like game strategy and player analysis.
+\end{itemize}
+
+
+This pipeline introduces several innovations to sports analytics: it integrates a broader range of advanced neural models, emphasizes multivariate and multi-task forecasting, and incorporates contextual game information to improve prediction accuracy. These innovations enhance both the robustness and efficiency of player movement predictions, contributing to more informed decision-making in sports. The Diagram \ref{fig:pipeline} shows the preocess graphically.
+
+\begin{figure}[t]
+    \centering
+\begin{tikzpicture}[node distance=2.5cm and 4cm, every node/.style={font=\small}]% Nodes
+% Nodes
+\node (start) [startstop] {Start};
+\node (collect) [process, right of=start, xshift=2cm] {collect Data};
+\node (flatten) [process, right of=collect, xshift=2cm] {flatten Data};
+\node (prepare) [process, below of=flatten] {add velocity information};
+\node (feed) [process, left of=prepare, xshift=-2cm] {feed into model};
+\node (out) [process, left of=feed, xshift=-2cm] {get output velocity};
+\node (post) [process, below of=out] {transfer back to position};
+\node (metrics) [process, right of=post, xshift=2cm] {calculate metrics};
+\node (stop) [startstop, right of=metrics, xshift=2cm] {End};
+
+% Arrows
+\draw [arrow] (start) -- (collect);
+\draw [arrow] (collect) -- (flatten);
+\draw [arrow] (flatten) -- (prepare);
+\draw [arrow] (prepare) -- (feed);
+\draw [arrow] (feed) -- (out);
+\draw [arrow] (out) -- (post);
+\draw [arrow] (post) -- (metrics);
+\draw [arrow] (metrics) -- (stop);
+\end{tikzpicture}
+    \caption{Overview of the predictive modeling pipeline for sports data.}
+    \label{fig:pipeline}
+\end{figure}
+
+\section{Pre-processing}
+\label{sec:preprocessing}
+The input to the models consists of tensors representing the 2D positional and velocity data of all players and the ball for either NBA or soccer games. To preprocess this data, several parameters must be set initially. The parameter \(steps_{in}\) determines the amount of historical context provided as input, where one timestep corresponds to 0.04 seconds. The trajectory data is split into rolling windows of size \(size_{in}\).
+
+Additionally, to incorporate information relative to the two baskets in NBA or the two goals in soccer, the position and velocity information for each player, the ball, and the baskets/goals are concatenated with the rest of the data. This results in \(4 \times (\text{num\_players} + 3)\) pieces of information per timeframe.
+
+Several considerations for pre-processing include:
+
+\subsection{All Players vs. One Player}
+
+The data can include either all players or focus on a single target player. When considering all players, the input tensor includes the positional and velocity data for each player, the ball, and the baskets/goals. When focusing on one player, only the positional and velocity data of the target player, the ball, and the baskets/goals are used.
+
+\subsection{Positional Only vs. Velocity Only}
+
+This consideration determines whether only positional data or only velocity data is used as input. If using positional data only, the input tensors consist of the x and y coordinates of the players, the ball, and the baskets/goals. Conversely, if using velocity data only, the input tensors consist of the x and y components of the velocity vectors of the players, the ball, and the baskets/goals.
+
+\subsection{Univariate vs. Multivariate Models}
+
+In the preprocessing step, there are two main approaches to structuring the input data: univariate and multivariate models. These approaches differ in how the x and y components (position and velocity) are handled.
+
+\paragraph{Univariate Models}
+In univariate models, separate predictors are used for the x and y components. The input data is split into four separate input tensors: \(x_{pos}\), \(y_{pos}\), \(x_{vel}\), and \(y_{vel}\). Each predictor specializes in one dimension, with one predictor handling the x-axis (using \(x_{pos}\) and \(x_{vel}\)) and the other handling the y-axis (using \(y_{pos}\) and \(y_{vel}\)). The final prediction is obtained by combining the outputs of both predictors.
+
+\paragraph{Multivariate Models}
+In multivariate models, the input data for both positional and velocity components across x and y axes are combined into a single input tensor. This allows a single model to process the combined data and predict both the x and y velocity components simultaneously. This approach can capture interactions between the x and y dimensions if such dynamics are correlated.
+
+\paragraph{Note on Linear Models}
+Univariate models are currently not implemented for linear models, and their applicability remains undetermined.
+
+
+Depending on the specific case and requirements of the model, the pre-processing steps will be adjusted accordingly to handle these different scenarios.
+
+\section{Main Processing}
+\label{sec:main_proc}
+In the main processing step, each model is designed to predict velocities from the input data. These predicted velocities are then used in the post-processing step to update positions. Here is a detailed explanation of the processing steps for each model type:
+
+\subsection{Linear Models}
+Linear models consist of one or two linear layers. The variations of these models are as follows:
+
+\paragraph{One Layer Linear Model}
+The \gls{1ll} model consists of a single linear layer that transforms the input data into velocity predictions.
+
+\paragraph{Two Layer Linear Model}
+The \gls{2ll} model includes an initial linear layer followed by a non-linear activation function such as \gls{relu}, a dropout layer, and a final linear layer.
+
+\subsection{Recurrent Models}
+
+\paragraph{Long Short-Term Memory Model}
+The \gls{lstm} model starts with an \gls{lmu} layer followed by an \gls{lstm} layer, with a final linear layer producing velocity predictions.
+
+\paragraph{Legendre Memory Unit Model}
+The \gls{lmu} model starts with an \gls{lmu} layer followed by another \gls{lmu} layer, with a final linear layer generating velocity predictions.
+
+\subsection{Complex Models}
+
+\paragraph{Transformer Model}
+The Transformer Model starts with an \gls{lmu} layer, followed by a Transformer network and a final linear layer that produces the velocity predictions.
+
+\paragraph{BitNet Model}
+The BitNet Model starts with an \gls{lmu} layer, followed by BitNet and a final linear layer.
+
+\subsection{Special Cases}
+For all models, there are a few special cases:
+
+\begin{itemize}
+    \item \textbf{Position-Only Version:} Processes only positional data (x and y coordinates).
+    \item \textbf{Velocity-Only Version:} Processes only velocity data (x and y components).
+    \item \textbf{Full Version:} Utilizes both positional and velocity data.
+    \item \textbf{Univariate Version:} Processes each dimension (x and y) separately, with results concatenated and reshaped. Note that univariate versions are not implemented for linear models.
+\end{itemize}
+
+
+\section{Post Processing}
+\label{sec:postprocessing}
+
+After obtaining the model predictions, which are trained to output velocities, a post-processing step is required to convert these velocities back to positions. This conversion is essential as the final goal is to predict the positional data.
+
+Given the predicted velocities \( \mathbf{v}_{pred}(t) \) for time \( t \), the position at the next timestep can be computed using the following equation:
+
+\[
+\mathbf{p}(t+1) = \mathbf{p}(t) + \mathbf{v}_{pred}(t) \cdot \Delta t
+\]
+
+In this equation, \( \mathbf{p}(t) \) denotes the position at time \( t \), \( \mathbf{v}_{pred}(t) \) represents the predicted velocity at time \( t \), and \( \Delta t \) is the time interval between successive timesteps.
+
+This equation updates the position by adding the product of the predicted velocity and the time interval to the current position, thus converting the velocity predictions back into positional data.

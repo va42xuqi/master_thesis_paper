@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results for NBA on pretrained with 1 player.}
+\label{pre:NBA}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.22 & 1.06 & 1.08 & 1.05 & 1.21 & 1.15 \\
+MSE (m) & 3.90 & 3.07 & 3.15 & 3.05 & 3.87 & 3.54 \\
+ADE (m) & 1.93 & 1.68 & 1.70 & 1.67 & 1.91 & 1.82 \\
+FDE (m) & 4.11 & 3.52 & 3.54 & 3.48 & 4.07 & 3.81 \\
+NL\_ADE (m) & 2.45 & 2.17 & 2.20 & 2.19 & 2.43 & 2.30 \\
+AAE (grad) & 57.90 & 54.55 & 54.44 & 53.38 & 59.11 & 56.39 \\
+FAE (grad) & 69.43 & 67.15 & 67.11 & 65.36 & 71.87 & 69.60 \\
+\end{tabular}
+\end{table}

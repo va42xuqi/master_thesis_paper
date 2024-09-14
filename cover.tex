@@ -1,0 +1,68 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{graphicx}
+\usepackage{pstricks}
+%\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% To compile the template to DVI use                      %
+%    latex cover                                          %
+% PDFLaTeX will not produce any output for this template! %
+%                                                         %
+% To obtain a PostScript file use                         %
+%    dvips -o cover.ps cover.dvi                          %
+%                                                         %
+% To get PDF output use                                   %
+%    dvipdf cover.pdf cover.dvi                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please replace the following definitions with your own! %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\thesistype}[0]{Masterthesis}
+\newcommand{\thesistitle}[0]{Transformers are all you need? Forecasting human motion with attention!}
+\newcommand{\thesisauthor}[0]{Denis Gosalci}
+
+\geometry{left=2.5cm,right=1.7cm,top=2cm,bottom=1cm}
+\begin{document}
+  \pagestyle{empty}
+  \newsavebox\faulogobox%
+  \sbox\faulogobox{\includegraphics[width=4.6cm]{faulogo.eps}}%
+  \begin{pspicture}(16.5,25.5)
+    \psset{linewidth=1pt}
+    \pscustom {
+      \code{2 setlinejoin}
+      \psline(6.7,0)(6.7,7)(10.7,7)
+    }
+    \psline(6.7,3.5)(8.7,3.5)
+    \pscustom {
+      \code{2 setlinejoin}
+      \psline(7.4,0)(11.5,7)(11.5,0)
+    }
+    \psline(9.45,3.5)(11.5,3.5)
+    \psline[linearc=2.025,showpoints](12.2,7)(12.2,0)(16.25,0)(16.25,7)
+    \psline[linearc=0.5](16.25,7.6)(16.25,17.5)(-0.5,17.5)(-0.5,24)(16.25,24)(16.25,25.5)
+    \rput[lb](0.15,18.9){\usebox\faulogobox}
+    \rput[lb](-0.2,18.3){
+      \begin{minipage}[b]{5cm} \centering \Large \bf \thesistype \end{minipage}}
+    \rput[lb](6,18.9){\begin{minipage}[c][4.1cm]{9.5cm} 
+	  \centering 
+	  \Large \bf \thesistitle \\
+	  \vspace{0.7cm} 
+	  \thesisauthor 
+    \end{minipage}}
+    \rput[lb](-0.4,0){\begin{minipage}[t][6.8cm]{6.8cm}
+	\begin{flushright}
+	  \Large \bf
+	  Lehrstuhl für Informatik 2\\
+	  (Programmiersysteme)\\
+	  \vspace{0.5cm}
+	  Department Informatik\\
+	  \vspace{0.5cm}
+	  Friedrich-Alexander-Universität
+	  Erlangen-Nürnberg
+	\end{flushright}
+    \end{minipage}}
+  \end{pspicture}
+\end{document}

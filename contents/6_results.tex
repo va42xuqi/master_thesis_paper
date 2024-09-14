@@ -1,0 +1,633 @@
+\chapter{Results}
+This Chapter introduces metrics needed to evaluate and benchmark model performance, detailed in Section \ref{sec:metrics}. The subsequent Section \ref{sec:eval} presents a comprehensive evaluation of the experiments, covering model performance and comparisons.
+
+\section{Metrics}
+\label{sec:metrics}
+This section outlines the metrics used for evaluating trajectory prediction models. These include \gls{mse} and \gls{mae} for fundamental accuracy, \gls{fde} and \gls{ade} for positional accuracy, \gls{nlade} for non-linear trajectory segments, and \gls{fae} and \gls{aae} for directional accuracy. Details for each metric are provided in Sections \ref{eq:mse} to \ref{eq:aae}.
+
+\subsection{Mean Squared Error}
+\label{eq:mse}
+\gls{mse} which is already discussed in Section \ref{sec:performance} is also used as a metric.
+
+\subsection{Mean Absolute Error}
+\label{eq:mae}
+\gls{mae} measures the average magnitude of the errors in a set of predictions, without considering their direction:
+\begin{equation}
+\text{MAE} = \frac{1}{n \cdot m} \sum_{i=1}^n \sum_{j=1}^m \left| \hat{y}_{i,j} - y_{i,j} \right|
+\end{equation}
+\subsection{Final Displacement Error}
+\label{eq:FDE}
+\gls{fde} calculates the Euclidean distance between the predicted final position and the true final position at time \(T_{\text{pred}}\):
+\begin{equation}
+\text{FDE} = \frac{1}{n} \sum_{i=1}^n \sqrt{ (\hat{x}_{T_{\text{pred}},i} - x_{T_{\text{pred}},i})^2 + (\hat{y}_{T_{\text{pred}},i} - y_{T_{\text{pred}},i})^2 }
+\end{equation}
+This metric is discussed in detail by Xu et al. \cite{xu2018collision}.
+
+\subsection{Average Displacement Error}
+\label{eq:ADE}
+\gls{ade} measures the mean squared error over all predicted points in the trajectory:
+\begin{equation}
+\text{ADE} = \frac{\sum_{i=1}^n \sum_{t=T_{\text{obs}}+1}^{T_{\text{pred}}} \left( (\hat{x}_{t,i} - x_{t,i})^2 + (\hat{y}_{t,i} - y_{t,i})^2 \right)}{n \cdot (T_{\text{pred}} - (T_{\text{obs}} + 1))}
+\end{equation}
+This metric is also discussed by Xu et al. \cite{xu2018collision}.
+
+\subsection{Average Non-Linear Displacement Error}
+\label{eq:nl-ade}
+\gls{nlade} focuses on the MSE in non-linear regions of a trajectory, calculated as:
+\begin{equation}
+\text{NL-ADE} = \frac{\sum_{i=1}^n \sum_{t=T_{\text{obs}}+1}^{T_{\text{pred}}} I_{t,i} \left( (\hat{x}_{t,i} - x_{t,i})^2 + (\hat{y}_{t,i} - y_{t,i})^2 \right)}{\sum_{i=1}^n \sum_{t=T_{\text{obs}}+1}^{T_{\text{pred}}} I_{t,i}}
+\end{equation}
+where \(I_{t,i}\) is an indicator function that equals 1 if the trajectory has a non-zero curvature at time \(t\) and 0 otherwise \cite{xu2018collision}. Human movements are dynamic and continuously changing. To make \gls{nlade} useful, it is necessary to introduce a threshold, for example, \(\delta v = 0.5 \text{m/s}\). Trajectories with curvature below this threshold would be considered not non-linear enough.
+
+\subsection*{Angular Error}
+\label{eq:angular error}
+\gls{ae} quantifies the discrepancy between the predicted and true velocity vectors. It can be measured using the cosine similarity, defined as:
+\begin{equation}
+\cos \theta_{t,i} = \frac{\mathbf{v}_{t,i} \cdot \hat{\mathbf{v}}_{t,i}}{\|\mathbf{v}_{t,i}\| \|\hat{\mathbf{v}}_{t,i}\|}
+\end{equation}
+\begin{equation}
+\theta_{t,i} = \text{arccos} \left( \frac{\mathbf{v}_{t,i} \cdot \hat{\mathbf{v}}_{t,i}}{\|\mathbf{v}_{t,i}\| \|\hat{\mathbf{v}}_{t,i}\|} \right)
+\label{angular_error}
+\end{equation}
+where \(\mathbf{v}_{t,i}\) and \(\hat{\mathbf{v}}_{t,i}\) are the true and predicted velocity vectors, respectively, at time \(t\). For numerical stability, a small \(\epsilon\) is added to the denominator.
+
+
+\subsection{Final Angular Error}
+\label{eq:fae}
+\gls{fae} measures the angular discrepancy at the final time step \(T_{\text{pred}}\). It is computed as:
+\begin{equation}
+\text{FAE} = \theta_{T_{\text{pred}},i} \times \frac{180}{\pi}
+\end{equation}
+where \(\theta_{T_{\text{pred}},i}\) is the \gls{ae} calculated at \(T_{\text{pred}}\) as defined in \eqref{angular_error}.
+
+\subsection{Average Angular Error}
+\label{eq:aae}
+\gls{aae} computes the mean angular difference between predicted and true velocity vectors over all time steps. It is defined as:
+\begin{equation}
+\text{AAE} = \frac{1}{n \cdot (T_{\text{pred}} - T_{\text{obs}})} \sum_{i=1}^n \sum_{t=T_{\text{obs}}+1}^{T_{\text{pred}}} \theta_{t,i} \times \frac{180}{\pi}
+\end{equation}
+where \(\theta_{t,i}\) is the \gls{ae} calculated for trajectory \(i\) at time \(t\) as defined in \eqref{angular_error}.
+
+These metrics offer a comprehensive assessment of trajectory prediction performance, capturing various dimensions of accuracy and error.
+
+\section{Experiment Evaluation}
+\todo{add graphical comparisons of the model performance on each task}
+\todo{evaluation can be better}
+\todo{add references to tables and graphics (once included)}
+\todo{angular errors are not correct - adjustment necessary}
+\label{sec:eval}
+This section presents a comprehensive analysis of the results obtained from various models, including \gls{1ll}, \gls{2ll}, \gls{lstm}, \gls{lmu}, Transformer, and BitNet. Each experiment is examined in depth, offering insights into the performance and effectiveness of these models in addressing the research questions. The evaluations aim to compare the models, assess their strengths and weaknesses, and provide a thorough understanding of their capabilities in the given context. For each experiment and metric, the best model's performance is highlighted in bold. Additionally, angular errors have been converted to gradients for improved readability.
+
+\subsection{Full Input}
+\label{exp:init}
+This section provides an overview of the models' performance when using the full input data. The models were trained on various games and tested on unseen games from the same domain. The performance of the models was evaluated on the two given scene types listed in \ref{sec:data}. This experiment serves as a baseline for comparing the performance of different models on full input data.
+
+\subsubsection{NBA}
+The following tables \ref{init: NBA1} and \ref{init: NBA2} show the results of the initial test run. These tables are split into two parts for readability. For other experiments, the standard deviation is omitted, and the models will be presented in a single table. The results from this experiment provide a baseline for evaluating the performance of the models on the full input data.
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA (Part 1).}
+\label{init: NBA1}
+\begin{tabular}{l||c|c|c}
+Metric & BitNet & LMU & LSTM \\
+\hline \hline
+MAE (m) & 1.15 $\pm$ 0.74 & 1.05 $\pm$ 0.69 & 1.06 $\pm$ 0.70 \\
+MSE (m) & 3.49 $\pm$ 5.00 & 2.99 $\pm$ 4.90 & 3.04 $\pm$ 4.80 \\
+ADE (m) & 1.82 $\pm$ 1.18 & 1.67 $\pm$ 1.11 & 1.68 $\pm$ 1.12 \\
+FDE (m) & 3.81 $\pm$ 2.55 & \textbf{3.47 $\pm$ 2.49} & 3.51 $\pm$ 2.48 \\
+NL-ADE (m) & 2.32 $\pm$ 1.56 & 2.16 $\pm$ 1.51 & 2.17 $\pm$ 1.51 \\
+AAE (grad) & 56.40 $\pm$ 50.35 & 54.05 $\pm$ 50.00 & 54.65 $\pm$ 51.13 \\
+FAE (grad) & 67.31 $\pm$ 52.74 & 65.72 $\pm$ 52.41 & 66.82 $\pm$ 53.38 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA (Part 2).}
+\label{init: NBA2}
+\begin{tabular}{l||c|c|c}
+Metric & Transformer & One Layer Linear & Two Layer Linear \\
+\hline \hline
+MAE (m) & \textbf{1.04 $\pm$ 0.68} & 1.22 $\pm$ 0.72 & 1.18 $\pm$ 0.79 \\
+MSE (m) & \textbf{2.94 $\pm$ 4.68} & 3.79 $\pm$ 4.94 & 3.73 $\pm$ 5.49 \\
+ADE (m) & \textbf{1.65 $\pm$ 1.09} & 1.93 $\pm$ 1.15 & 1.88 $\pm$ 1.27 \\
+FDE (m) & 3.48 $\pm$ 2.44 & 4.05 $\pm$ 2.55 & 3.81 $\pm$ 2.71 \\
+NL-ADE (m) & \textbf{2.15 $\pm$ 1.49} & 2.40 $\pm$ 1.56 & 2.37 $\pm$ 1.65 \\
+AAE (grad) & \textbf{53.40 $\pm$ 50.62} & 65.01 $\pm$ 53.30 & 57.12 $\pm$ 51.11 \\
+FAE (grad) & \textbf{65.30 $\pm$ 53.14} & 81.16 $\pm$ 52.74 & 70.37 $\pm$ 54.90 \\
+\end{tabular}
+\end{table}
+
+The Transformer model demonstrates the strongest overall performance, achieving the lowest scores in several key metrics: \gls{mae} (1.04 m), \gls{mse} (2.94 m), \gls{ade} (1.65 m), \gls{nlade} (2.15 m), \gls{aae} (53.40 grad), and \gls{fae} (65.30 grad). While the \gls{fde} for the Transformer (3.48 m) is slightly higher than that of the \gls{lmu} (3.47 m), it remains highly competitive. In comparison, the \gls{lmu} model generally outperforms BitNet and \gls{lstm} across most metrics, particularly in \gls{mse} (2.99 m), \gls{mse} (1.67 m), and \gls{fde} (3.47 m). However, it is slightly edged out by the Transformer model in overall performance. BitNet and \gls{lstm} show similar performance levels, but they do not match the efficacy of LMU and the Transformer in this dataset. The \gls{1ll} and \gls{2ll} exhibit the weakest performance overall.
+
+\subsubsection{Soccer}
+For the same reason as the NBA table, this table is split into two parts for readability.
+
+\begin{table}[H]
+\centering
+\caption{Results for Soccer (Part 1).}
+\label{init: SOC1}
+\begin{tabular}{l||c|c|c}
+Metric & BitNet & LMU & LSTM \\
+\hline \hline
+MAE (m) & 1.07 $\pm$ 0.86 & \textbf{0.91 $\pm$ 0.64} & 2.26 $\pm$ 1.53 \\
+MSE (m) & 3.72 $\pm$ 6.70 & \textbf{2.56 $\pm$ 4.25} & 12.29 $\pm$ 16.81 \\
+ADE (m) & 1.69 $\pm$ 1.35 & \textbf{1.43 $\pm$ 0.99} & 3.59 $\pm$ 2.40 \\
+FDE (m) & 4.07 $\pm$ 3.24 & \textbf{3.62 $\pm$ 2.74} & 6.76 $\pm$ 4.60 \\
+NL-ADE (m) & 1.92 $\pm$ 1.42 & \textbf{1.63 $\pm$ 1.08} & 3.72 $\pm$ 2.53 \\
+AAE (grad) & 39.81 $\pm$ 44.17 & \textbf{36.87 $\pm$ 42.21} & 81.18 $\pm$ 54.38 \\
+FAE (grad) & 62.43 $\pm$ 50.09 & 60.60 $\pm$ 50.25 & 80.59 $\pm$ 54.48 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for Soccer (Part 2).}
+\label{init: SOC2}
+\begin{tabular}{l||c|c|c}
+Metric & Transformer & One Layer Linear & Two Layer Linear \\
+\hline \hline
+MAE (m) & 0.94 $\pm$ 0.74 & 1.19 $\pm$ 0.74 & 1.15 $\pm$ 0.81 \\
+MSE (m) & 2.92 $\pm$ 5.13 & 3.75 $\pm$ 5.58 & 3.79 $\pm$ 6.17 \\
+ADE (m) & 1.48 $\pm$ 1.15 & 1.87 $\pm$ 1.15 & 1.81 $\pm$ 1.27 \\
+FDE (m) & 3.74 $\pm$ 2.94 & 4.25 $\pm$ 2.99 & 4.16 $\pm$ 3.10 \\
+NL-ADE (m) & 1.74 $\pm$ 1.23 & 1.96 $\pm$ 1.24 & 1.96 $\pm$ 1.34 \\
+AAE (grad) & 37.11 $\pm$ 42.64 & 55.99 $\pm$ 48.08 & 41.26 $\pm$ 43.87 \\
+FAE (grad) & \textbf{59.38 $\pm$ 49.43} & 77.24 $\pm$ 53.45 & 60.75 $\pm$ 50.74 \\
+\end{tabular}
+\end{table}
+
+In this domain, the LMU model generally performs better than the Transformer across most metrics. The LMU achieves the lowest MAE (0.91 m), MSE (2.56 m), ADE (1.43 m), FDE (3.62 m), NL-ADE (1.63 m), and AAE (36.87 grad), showing slightly better results compared to the Transformer. However, the Transformer still exhibits competitive performance, with the lowest FAE (59.38 grad) among all models. BitNet and LSTM show comparatively weaker performance. Notably, the LSTM model struggles significantly in the soccer dataset, with the highest MAE (2.26 m), MSE (12.29 m), ADE (3.59 m), and FDE (6.76 m) among the models evaluated. This suggests that the LSTM model is less adaptable to the soccer scene compared to the LMU and Transformer. Since all models were optimized on the NBA dataset and their hyperparameters remained constant for the Soccer dataset, the models are not optimized for Soccer, which contributes to LSTM’s instability across domains.
+
+\subsubsection{Summary}
+The full input experiment establishes a baseline for model performance. The Transformer model excels with the NBA dataset, demonstrating superior performance across most metrics. Conversely, the LMU model performs slightly better with the Soccer dataset, showing lower MAE, MSE, ADE, FDE, NL-ADE, and AAE. Overall, the Transformer and LMU models are the most effective, with LMU slightly outperforming the Transformer in Soccer and the Transformer showing better results in NBA.
+
+\subsection{Positions vs Velocities vs Full Input}
+\label{exp:pos_vel}
+
+
+This section examines how the performance of different models changes when using only positional data, only velocity data, or the full dataset as input. We compare results for both the NBA and Soccer scene types to assess the impact of input type on model performance. This experiment addresses research Question \textbf{Q1}.
+
+\subsubsection{NBA}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA using positional data only.}
+\label{pos:NBA1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L Linear & 2L Linear \\
+\hline \hline
+MAE (m) & 1.70 & 1.17 & 1.29 & \textbf{1.16} & 1.63 & 1.59 \\
+MSE (m) & 6.41 & \textbf{3.38} & 3.95 & 3.45 & 6.43 & 6.21 \\
+ADE (m) & 2.72 & \textbf{1.84} & 2.03 & 1.84 & 2.59 & 2.54 \\
+FDE (m) & 4.86 & 3.69 & 3.88 & \textbf{3.65} & 4.67 & 4.56 \\
+NL-ADE (m) & 3.07 & \textbf{2.27} & 2.44 & 2.31 & 3.03 & 3.02 \\
+AAE (grad) & 69.78 & 57.69 & 61.79 & \textbf{55.54} & 70.81 & 65.79 \\
+FAE (grad) & 75.46 & 68.33 & 70.37 & \textbf{66.52} & 76.42 & 69.18 \\
+\end{tabular}
+\end{table}
+
+Table \ref{pos:NBA1} shows the performance of different models using positional data only for the NBA dataset. The Transformer model achieves the lowest MAE (1.16 meters) and FDE (3.65 meters), indicating its strong performance in accurately predicting the future positions of players. The LMU model excels with the lowest ADE (1.84 meters) and AAE (57.69 grad), suggesting that it performs well in minimizing average displacement error and angular error. The LSTM model is competitive, but it does not surpass the Transformer and LMU in most metrics.
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA using velocity-only data.}
+\label{vel:NBA1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L Linear & 2L Linear \\
+\hline \hline
+MAE (m) & 1.34 & 1.15 & 1.14 & \textbf{1.13} & 1.24 & 1.22 \\
+MSE (m) & 4.72 & 3.73 & 3.70 & \textbf{3.63} & 4.35 & 4.21 \\
+ADE (m) & 2.13 & 1.83 & 1.81 & \textbf{1.79} & 1.98 & 1.94 \\
+FDE (m) & 4.29 & 3.90 & 3.83 & \textbf{3.82} & 4.24 & 4.16 \\
+NL-ADE (m) & 2.65 & 2.37 & 2.37 & \textbf{2.37} & 2.53 & 2.53 \\
+AAE (grad) & 66.20 & 60.63 & 61.17 & \textbf{59.64} & 63.13 & 62.57 \\
+FAE (grad) & 76.73 & 75.75 & 76.24 & \textbf{73.98} & 78.22 & 77.09 \\
+\end{tabular}
+\end{table}
+
+Table \ref{vel:NBA1} presents the results using velocity-only data for the NBA dataset. The Transformer model demonstrates the best performance with the lowest MAE (1.13 meters) and FDE (3.82 meters). The LMU model also performs well, achieving an ADE of 1.83 meters and an MAE of 1.15 meters. The LSTM is competitive, particularly in MAE, but does not outperform the Transformer and LMU across the majority of metrics.
+
+\subsubsection{Soccer}
+
+\begin{table}[H]
+\centering
+\caption{Results for Soccer using positional data only.}
+\label{pos:SOC1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L Linear & 2L Linear \\
+\hline \hline
+MAE (m) & 2.29 & \textbf{1.16} & 2.27 & 1.25 & 1.87 & 1.61 \\
+MSE (m) & 12.41 & \textbf{3.89} & 12.18 & 4.69 & 8.29 & 6.93 \\
+ADE (m) & 3.63 & \textbf{1.84} & 3.59 & 1.98 & 2.93 & 2.54 \\
+FDE (m) & 6.88 & \textbf{4.32} & 6.76 & 4.49 & 6.07 & 5.22 \\
+NL-ADE (m) & 3.74 & \textbf{2.00} & 3.71 & 2.18 & 3.01 & 2.68 \\
+AAE (grad) & 77.64 & 44.13 & 77.86 & \textbf{43.96} & 69.28 & 53.01 \\
+FAE (grad) & 74.17 & 67.48 & 75.13 & \textbf{64.72} & 76.83 & 70.18 \\
+\end{tabular}
+\end{table}
+
+Table \ref{pos:SOC1} provides the performance metrics using positional data only for the Soccer dataset. The LMU model shows the best results with the lowest MAE (1.16 meters), ADE (1.84 meters), and NL-ADE (2.00 meters). The Transformer model achieves the lowest FAE (64.72 grad), reflecting its strength in angular error prediction. The LSTM model, although effective, does not perform as well as the LMU and Transformer in most metrics.
+
+\begin{table}[H]
+\centering
+\caption{Results for Soccer using velocity-only data.}
+\label{vel:SOC1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L Linear & 2L Linear \\
+\hline \hline
+MAE (m) & 1.84 & \textbf{0.83} & 0.89 & 0.94 & 0.93 & 1.01 \\
+MSE (m) & 8.18 & \textbf{2.36} & 2.69 & 2.93 & 2.87 & 3.26 \\
+ADE (m) & 2.90 & \textbf{1.31} & 1.41 & 1.48 & 1.47 & 1.59 \\
+FDE (m) & 5.75 & \textbf{3.46} & 3.62 & 3.75 & 3.84 & 3.97 \\
+NL-ADE (m) & 2.99 & \textbf{1.58} & 1.67 & 1.73 & 1.71 & 1.81 \\
+AAE (grad) & 54.40 & \textbf{34.36} & 35.55 & 36.56 & 38.51 & 38.13 \\
+FAE (grad) & 70.59 & \textbf{57.43} & 58.84 & 58.51 & 65.76 & 61.27 \\
+\end{tabular}
+\end{table}
+
+Table \ref{vel:SOC1} details the performance with velocity-only data for the Soccer dataset. The LMU model achieves the lowest MAE (0.83 meters) and ADE (1.31 meters), demonstrating its effectiveness in predicting player movement with velocity data alone. The Transformer model performs well but falls short of the LMU in several metrics. The LSTM and other models also show competitive performance but do not exceed the LMU’s results in accuracy and error metrics.
+
+
+
+
+\subsection{Historical Context and Forecast Horizon}
+\label{exp:history_forcast}
+This experiment is crucial for understanding the impact of different historical input lengths and output horizons on the performance of various models in predicting future positions. By analyzing these relationships, we can identify which models are better suited for short-term versus long-term predictions and assess their robustness across different input lengths. For clarity and conciseness, only three history lengths were selected for detailed comparison: 0.04s, 1.0s, and 2.0s. These specific lengths were chosen to provide insights into both very short-term and more extended historical contexts.
+
+\subsubsection{NBA}
+\begin{table}[H]
+\centering
+\caption{Results for NBA on history length of 0.04s.}
+\label{hist:NBA_0.04s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline 
+MAE (m) & 1.22 & 1.82 & 1.69 & \textbf{1.12} \\
+MSE (m) & 3.87 & 6.87 & 6.40 & \textbf{3.46} \\
+ADE (m) & 1.93 & 2.83 & 2.71 & \textbf{1.77} \\
+Disp. Err. 1s (m) & 0.75 & 1.21 & 1.21 & \textbf{0.69} \\
+Disp. Err. 2s (m) & 1.90 & 2.83 & 2.71 & \textbf{1.74} \\
+Disp. Err. 3s (m) & 3.02 & 4.37 & 4.14 & \textbf{2.79} \\
+Disp. Err. 4s (m) & 3.99 & 5.64 & 5.35 & \textbf{3.70} \\
+NL-ADE (m) & 2.36 & 3.14 & 3.03 & \textbf{2.26} \\
+AAE (grad) & 58.13 & 68.07 & 66.50 & \textbf{55.49} \\
+Ang. Err. 1s (grad) & 53.29 & 63.03 & 61.31 & \textbf{51.57} \\
+Ang. Err. 2s (grad) & 64.74 & 73.34 & 72.19 & \textbf{61.31} \\
+Ang. Err. 3s (grad) & 67.61 & 76.20 & 74.48 & \textbf{63.60} \\
+Ang. Err. 4s (grad) & 69.33 & 76.20 & 75.06 & \textbf{67.61} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA on history length of 1.0s.}
+\label{hist:NBA_1.0s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline
+MAE (m) & 1.16 & 1.07 & 1.07 & \textbf{1.06} \\
+MSE (m) & 3.60 & 3.13 & 3.16 & \textbf{3.09} \\
+ADE (m) & 1.84 & 1.69 & 1.70 & \textbf{1.68} \\
+Disp. Err. 1s (m) & 0.70 & 0.66 & 0.67 & \textbf{0.65} \\
+Disp. Err. 2s (m) & 1.81 & 1.66 & 1.67 & \textbf{1.64} \\
+Disp. Err. 3s (m) & 2.89 & 2.66 & 2.66 & \textbf{2.64} \\
+Disp. Err. 4s (m) & 3.85 & 3.53 & 3.56 & \textbf{3.54} \\
+NL-ADE & 2.34 & 2.18 & 2.19 & \textbf{2.17} \\
+AAE (grad) (m) & 56.87 & 54.71 & 55.29 & \textbf{54.13} \\
+Ang. Err. 1s (grad) & 52.71 & 50.42 & 51.57 & \textbf{49.85} \\
+Ang. Err. 2s (grad) & 63.03 & \textbf{59.59} & 60.73 & \textbf{59.59} \\
+Ang. Err. 3s (grad) & 65.32 & 62.45 & 63.03 & \textbf{61.88} \\
+Ang. Err. 4s (grad) & 67.61 & \textbf{65.89} & 67.04 & \textbf{65.89} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA on history length of 2.0s.}
+\label{hist:NBA_2.0s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline
+MAE (m) & 1.15 & 1.05 & 1.06 & \textbf{1.04} \\
+MSE (m) & 3.49 & 2.99 & 3.04 & \textbf{2.94} \\
+ADE (m) & 1.82 & 1.67 & 1.68 & \textbf{1.65} \\
+Disp. Err. 1s (m) & 0.69 & 0.66 & 0.66 & \textbf{0.64} \\
+Disp. Err. 2s (m) & 1.78 & 1.63 & 1.65 & \textbf{1.61} \\
+Disp. Err. 3s (m) & 2.86 & 2.61 & 2.63 & \textbf{2.60} \\
+Disp. Err. 4s (m) & 3.81 & 3.47 & 3.51 & \textbf{3.48} \\
+NL-ADE (m) & 2.32 & 2.16 & 2.17 & \textbf{2.15} \\
+AAE (grad) & 56.40 & 54.05 & 54.65 & \textbf{53.40} \\
+Ang. Err. 1s (grad) & 52.14 & 49.85 & 51.57 & \textbf{49.27} \\
+Ang. Err. 2s (grad) & 63.03 & 59.01 & 60.16 & \textbf{59.01} \\
+Ang. Err. 3s (grad) & 64.74 & 61.88 & 61.88 & \textbf{60.73} \\
+Ang. Err. 4s (grad) & 67.04 & 65.89 & 67.04 & \textbf{65.32} \\
+\end{tabular}
+\end{table}
+
+For the NBA dataset, the evaluation is done across different history lengths: 0.04s, 1.0s, and 2.0s. 
+
+\begin{itemize}
+    \item \textbf{history length of 0.04s:} The Transformer model demonstrates the best performance with the lowest MAE of 1.12 meters, MSE of 3.46 meters, and ADE of 1.77 meters. It also excels in displacement errors across all time steps. The BitNet model shows competitive performance, but the Transformer outperforms it significantly.
+    \item \textbf{history length of 1.0s:} The Transformer maintains the best results, with the lowest MAE of 1.06 meters and MSE of 3.09 meters. It also shows improvements in ADE and displacement errors compared to other models. The LMU and LSTM models show competitive performance but fall short of the Transformer’s results.
+    \item \textbf{history length of 2.0s:} The Transformer continues to lead with the lowest MAE of 1.04 meters and MSE of 2.94 meters. It also performs well in displacement errors. The LMU and BitNet models show strong results but do not surpass the Transformer in accuracy.
+\end{itemize}
+
+
+\subsubsection{Soccer}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC on history length of 0.04s.}
+\label{hist:SOC_0.04s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline 
+MAE (m) & 1.36 & 1.72 & 2.28 & \textbf{1.13} \\
+MSE (m) & 5.36 & 6.77 & 12.53 & \textbf{4.17} \\
+ADE (m) & 2.15 & 2.71 & 3.62 & \textbf{1.79} \\
+Disp. Err. 1s (m) & 0.88 & 1.50 & 1.89 & \textbf{0.53} \\
+Disp. Err. 2s (m) & 2.03 & 2.34 & 3.68 & \textbf{1.60} \\
+Disp. Err. 3s (m) & 3.32 & 3.93 & 5.32 & \textbf{2.90} \\
+Disp. Err. 4s (m) & 4.66 & 5.78 & 6.83 & \textbf{4.29} \\
+NL-ADE (m) & 2.33 & 2.75 & 3.78 & \textbf{2.03} \\
+AAE (grad) & 42.37 & 53.09 & 90.37 & \textbf{42.26} \\
+Ang. Err. 1s (grad) & \textbf{28.65} & 33.80 & 91.67 & 29.22 \\
+Ang. Err. 2s (grad) & \textbf{45.26} & 47.56 & 91.10 & \textbf{45.26} \\
+Ang. Err. 3s (grad) & \textbf{56.15} & 57.87 & 87.09 & \textbf{56.15} \\
+Ang. Err. 4s (grad) & 64.74 & 65.32 & 87.66 & \textbf{63.60} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC on history length of 1.0s.}
+\label{hist:SOC_1.0s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline
+MAE (m) & 1.09 & 1.68 & 2.27 & \textbf{0.97} \\
+MSE (m) & 3.85 & 7.54 & 12.44 & \textbf{3.15} \\
+ADE (m) & 1.73 & 2.67 & 3.61 & \textbf{1.53} \\
+Disp. Err. 1s (m) & 0.56 & 0.91 & 1.88 & \textbf{0.40} \\
+Disp. Err. 2s (m) & 1.53 & 2.62 & 3.66 & \textbf{1.32} \\
+Disp. Err. 3s (m) & 2.77 & 4.25 & 5.30 & \textbf{2.52} \\
+Disp. Err. 4s (m) & 4.11 & 5.75 & 6.80 & \textbf{3.82} \\
+NL-ADE (m) & 1.95 & 2.81 & 3.76 & \textbf{1.80} \\
+AAE (grad) & 40.26 & 54.58 & 85.00 & \textbf{37.83} \\
+Ang. Err. 1s (grad) & 26.93 & 48.13 & 85.37 & \textbf{24.06} \\
+Ang. Err. 2s (grad) & 42.97 & 61.31 & 84.80 & \textbf{40.68} \\
+Ang. Err. 3s (grad) & 53.86 & 64.74 & 85.37 & \textbf{50.99} \\
+Ang. Err. 4s (grad) & 63.03 & 68.75 & 83.65 & \textbf{59.59} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC on history length of 2.0s.}
+\label{hist:SOC_2.0s}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline \hline
+MAE (m) & 1.07 & \textbf{0.91} & 2.26 & 0.94 \\
+MSE (m) & 3.72 & \textbf{2.56} & 12.29 & 2.92 \\
+ADE (m) & 1.69 & \textbf{1.43} & 3.59 & 1.48 \\
+Disp. Err. 1s (m) & 0.52 & 0.38 & 1.88 & \textbf{0.37} \\
+Disp. Err. 2s (m) & 1.49 & \textbf{1.18} & 3.65 & 1.26 \\
+Disp. Err. 3s (m) & 2.73 & \textbf{2.33} & 5.27 & 2.45 \\
+Disp. Err. 4s (m) & 4.07 & \textbf{3.62} & 6.76 & 3.74 \\
+NL-ADE (m) & 1.92 & \textbf{1.63} & 3.72 & 1.74 \\
+AAE (grad) & 39.81 & \textbf{36.87} & 81.18 & 37.11 \\
+Ang. Err. 1s (grad) & 26.36 & \textbf{21.20} & 83.08 & 22.92 \\
+Ang. Err. 2s (grad) & 42.40 & \textbf{37.82} & 80.79 & 39.53 \\
+Ang. Err. 3s (grad) & 53.29 & \textbf{50.99} & 80.79 & \textbf{50.99} \\
+Ang. Err. 4s (grad) & 62.45 & 60.73 & 80.79 & \textbf{59.59} \\
+\end{tabular}
+\end{table}
+
+For the Soccer dataset, the evaluation is done similarly across history lengths of 0.04s, 1.0s, and 2.0s.
+
+\begin{itemize}
+    \item \textbf{history length of 0.04s:} The Transformer model achieves the best performance with the lowest MAE of 1.13 meters, MSE of 4.17 meters, and ADE of 1.79 meters. It also outperforms other models in displacement errors. The LMU and BitNet models show competitive results, but the Transformer stands out in accuracy.
+    \item \textbf{history length of 1.0s:} The Transformer model performs the best with the lowest MAE of 0.97 meters and MSE of 3.15 meters. It shows the best results in ADE and displacement errors. The BitNet model also shows strong performance but does not match the Transformer’s results.
+    \item \textbf{history length of 2.0s:} At a 2.0s history length, the LMU model outperforms the Transformer in several key metrics, including MAE, MSE, ADE, Displacement Errors, and Angular Errors. This indicates that for longer history lengths, the LMU can provide better predictions than the Transformer. The Transformer’s performance remains competitive but is slightly edged out by LMU in this scenario.
+\end{itemize}
+
+\subsubsection{Summary}
+In summary, across different history lengths and datasets, the Transformer generally performs well, especially with shorter history lengths. For the NBA dataset, it excels with very short and moderately long history lengths but shows competitive performance even with extended history. For the Soccer dataset, the Transformer is strong with shorter histories but is outperformed by LMU with a 2.0s history. The choice of model may depend on the specific requirements of the task and the available historical data. The research question \textbf{Q2} regarding the impact of history length on model performance highlights that the Transformer and LMU show distinct strengths depending on the length of historical context.
+
+\subsection{Univariate vs. Multivariate Prediction Models}
+\label{exp:uni_multi}
+
+This section evaluates the performance of univariate and multivariate prediction models across two datasets: NBA and Soccer, aiming to address Research Question \textbf{Q3}.
+
+Univariate models use separate models for each axis, treating the x-axis and y-axis independently. For each dimension, positional and velocity data are managed by distinct models: one model predicts the x-dimension, and another predicts the y-dimension. This approach does not explicitly account for the interdependence between position and velocity, as each dimension is handled separately. In contrast, multivariate models combine both x and y dimensions, along with their associated positional and velocity data, into a single model. This approach leverages the direct correlation between position and velocity, as velocity is the derivative of position. By incorporating all variables into a unified model, multivariate approaches can capture complex interactions and dependencies between dimensions more effectively.
+
+\subsubsection{NBA Data}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA onunivariate models.}
+\label{uni:NBA}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline\hline
+MAE (m) & 1.17 & \textbf{1.07} & 1.19 & 1.08 \\
+MSE (m) & 3.56 & \textbf{3.16} & 3.69 & 3.17 \\
+ADE (m) & 1.85 & \textbf{1.70} & 1.90 & \textbf{1.70} \\
+FDE (m) & 3.88 & \textbf{3.58} & 3.72 & \textbf{3.58} \\
+NL-ADE (m) & 2.32 & 2.21 & 2.34 & \textbf{2.19} \\
+AAE (grad) & 56.88 & 54.78 & 60.72 & \textbf{54.07} \\
+FAE (grad) & 69.14 & 67.98 & 68.92 & \textbf{66.00} \\
+\end{tabular}
+\end{table}
+
+For the NBA dataset, a comparison of univariate and multivariate models is provided. BitNet demonstrates a slight improvement with the multivariate approach, achieving a MAE of 1.15 compared to 1.17 and an MSE of 3.49 compared to 3.56 in the univariate setting. LMU also performs better with the multivariate model, with a MAE of 1.05 versus 1.07 and an MSE of 2.99 versus 3.16. LSTM shows a clear advantage with multivariate models, evidenced by a lower MAE of 1.06 compared to 1.19 and an MSE of 3.04 compared to 3.69. The Transformer model also performs better in the multivariate setting, with a MAE of 1.04 versus 1.08 and an MSE of 2.94 versus 3.17.
+
+\subsubsection{Soccer Data}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC on univariate models.}
+\label{uni:SOC}
+\begin{tabular}{l||c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer \\
+\hline\hline
+MAE (m) & 1.06 & \textbf{0.89} & 0.90 & 0.98 \\
+MSE (m) & 3.64 & \textbf{2.48} & 2.60 & 3.11 \\
+ADE (m) & 1.67 & \textbf{1.40} & 1.42 & 1.54 \\
+FDE (m) & 4.07 & \textbf{3.57} & 3.62 & 3.81 \\
+NL-ADE (m) & 1.90 & \textbf{1.60} & 1.64 & 1.78 \\
+AAE (grad) & 39.87 & \textbf{35.97} & 36.18 & 37.21 \\
+FAE (grad) & 63.30 & 59.38 & \textbf{59.20} & 59.43 \\
+\end{tabular}
+\end{table}
+
+In the Soccer dataset, the performance of univariate and multivariate models is compared. BitNet’s performance is nearly identical between univariate and multivariate approaches, with a MAE of 1.07 versus 1.06 and an MSE of 3.72 versus 3.64. LMU shows a slight advantage with univariate models, with a MAE of 0.89 compared to 0.91 and an MSE of 2.48 compared to 2.56. LSTM exhibits a significant performance drop with multivariate models, having a MAE of 2.26 compared to 0.90 and an MSE of 12.29 compared to 2.60 in the univariate case. The Transformer model performs slightly better in the multivariate setting, with a MAE of 0.94 versus 0.98 and an MSE of 2.92 versus 3.11.
+
+\subsubsection{Summary}
+In summary, addressing \textbf{Q3} reveals that BitNet benefits slightly from the multivariate approach for the NBA dataset, while its performance is nearly identical between settings for Soccer. LMU performs similarly in NBA but shows a slight advantage with univariate models for Soccer. LSTM benefits from the multivariate approach in NBA but experiences a notable decline in performance with multivariate models in Soccer. The Transformer model shows consistent performance across both univariate and multivariate settings, with a slight advantage in multivariate models for both datasets.
+
+\subsection{Intra-Team vs. Inter-Team Performance}
+\label{exp:intra_inter}
+
+This section evaluates the performance of multivariate prediction models by examining their ability to generalize from data of one team to another unseen team within the NBA and Soccer datasets. This analysis addresses Research Question \textbf{Q4}, which investigates how well models trained on data from one team can perform on data from a different, unseen team.
+
+\textbf{Intra-Team Performance} refers to evaluating how well the model, trained on data from one team, can predict player movements and ball trajectories within the same team context. This is useful for understanding how effectively the model generalizes to different scenarios within the same team’s environment.
+
+\textbf{Inter-Team Performance} assesses the model’s ability to generalize to data from teams not included in the training set. This evaluation is crucial for understanding how well the model adapts to new teams with potentially different playing styles, strategies, and player dynamics.
+
+
+\subsubsection{NBA Data}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA, tested on other team.}
+\label{other_team:NBA}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & 1L linear & 2L linear & Transformer \\
+\hline\hline
+MAE (m) & 1.18 & 1.10 & 1.09 & 1.23 & 1.23 & \textbf{1.07} \\
+MSE (m) & 3.76 & 3.28 & 3.23 & 3.98 & 4.00 & \textbf{3.11} \\
+ADE (m) & 1.87 & 1.74 & 1.73 & 1.97 & 1.96 & \textbf{1.69} \\
+FDE (m) & 3.92 & 3.62 & 3.59 & 4.10 & 3.94 & \textbf{3.50} \\
+NL-ADE (m) & 2.26 & 2.07 & 2.07 & 2.30 & 2.32 & \textbf{2.03} \\
+AAE (grad) & 53.78 & 51.82 & 51.54 & 61.14 & 55.84 & \textbf{50.78} \\
+FAE (grad) & 64.88 & 64.06 & 63.84 & 83.89 & 65.33 & \textbf{62.66} \\
+\end{tabular}
+\end{table}
+
+For the NBA dataset, the performance of models trained on data from one team and tested on data from another team provides insights into \textbf{Q4}. BitNet shows a slight decrease in performance when tested on data from other teams, with MAE increasing from 1.15 to 1.18 and MSE rising from 3.49 to 3.76. LMU also shows a minor increase in MAE from 1.05 to 1.10 and MSE from 2.99 to 3.28. LSTM maintains stable performance with MAE of 1.09 versus 1.06 and MSE of 3.23 versus 3.04. Both one-layer and two-layer linear models experience slight declines in performance, with MAE increasing from 1.22 to 1.23 and 1.18 to 1.23, respectively, alongside small increases in MSE. The Transformer model remains highly consistent, with only a small increase in MAE from 1.04 to 1.07 and MSE from 2.94 to 3.11.
+
+\subsubsection{Soccer Data}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC, tested on other team.}
+\label{other_team:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & 1L linear & 2L linear & Transformer \\
+\hline\hline
+MAE (m) & 1.15 & \textbf{0.91} & 2.33 & 1.21 & 1.20 & 0.96 \\
+MSE (m) & 4.12 & \textbf{2.64} & 12.80 & 4.15 & 4.07 & 3.04 \\
+ADE (m) & 1.80 & \textbf{1.43} & 3.68 & 1.91 & 1.89 & 1.51 \\
+FDE (m) & 4.30 & \textbf{3.65} & 6.93 & 4.67 & 4.35 & 3.76 \\
+NL-ADE (m) & 2.00 & \textbf{1.64} & 3.82 & 2.01 & 2.02 & 1.76 \\
+AAE (grad) & 42.58 & \textbf{37.50} & 88.98 & 56.78 & 43.96 & 37.57 \\
+FAE (grad) & 66.28 & 60.93 & 89.14 & 78.14 & 64.68 & \textbf{60.17} \\
+\end{tabular}
+\end{table}
+
+For the Soccer dataset, the models are trained on data from one team and evaluated on data from an unseen team to address \textbf{Q4}. BitNet shows minimal changes, with MAE increasing slightly from 1.07 to 1.15 and MSE from 3.72 to 4.12. LMU maintains strong performance with MAE of 0.91 and MSE of 2.64, demonstrating minimal differences from initial results. LSTM, however, exhibits a significant drop in performance, with MAE rising to 2.33 and MSE increasing to 12.80. Both one-layer and two-layer linear models display minor increases in errors, with MAE growing from 1.19 to 1.21 and 1.15 to 1.20, respectively. The Transformer model continues to show strong consistency, with MAE increasing marginally from 0.94 to 0.96 and MSE from 2.92 to 3.04.
+
+\subsubsection{Summary}
+In the NBA dataset, models such as BitNet, LMU, LSTM, and Transformer exhibit minor variations when tested on data from different teams, with LSTM and Transformer demonstrating the most consistent performance. Linear models show slight declines. In the Soccer dataset, LMU and Transformer maintain robust performance across teams, whereas LSTM experiences a significant drop, indicating its sensitivity to team-specific data. Linear models exhibit moderate stability, while Transformer and LMU perform better overall when generalizing to unseen teams.
+
+\subsection{Transfer Learning}
+\label{exp:transf}
+This section evaluates the generalization capabilities of models between different sports using transfer learning. The approach involves training models on data from a single player in one sport and subsequently fine-tuning these models with data from single players in another sport. For instance, models are initially pretrained on soccer data from a single player, and then fine-tuned using data from NBA players. This process assesses how well a model trained in one sport adapts to predicting movements in another sport, thereby evaluating the models' ability to generalize across different game contexts. This experiment addresses research question \textbf{Q5}.
+
+\subsubsection{NBA}
+
+\begin{table}[H]
+\centering
+\caption{Results for NBA on pretrained with 1 player.}
+\label{pre:NBA}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.22 & \textbf{1.06} & 1.08 & 1.05 & 1.21 & 1.15 \\
+MSE (m) & 3.90 & \textbf{3.07} & 3.15 & 3.05 & 3.87 & 3.54 \\
+ADE (m) & 1.93 & 1.68 & 1.70 & \textbf{1.67} & 1.91 & 1.82 \\
+FDE (m) & 4.11 & \textbf{3.52} & 3.54 & 3.48 & 4.07 & 3.81 \\
+NL-ADE (m) & 2.45 & \textbf{2.17} & 2.20 & 2.19 & 2.43 & 2.30 \\
+AAE (grad) & 57.90 & 54.55 & 54.44 & \textbf{53.38} & 59.11 & 56.39 \\
+FAE (grad) & 69.43 & 67.15 & 67.11 & \textbf{65.36} & 71.87 & 69.60 \\
+\end{tabular}
+\end{table}
+
+In the context of the NBA dataset, the Transformer model demonstrates the highest performance among pretrained models, achieving a Mean Absolute Error (MAE) of 1.05 meters and a Mean Squared Error (MSE) of 3.05 meters. The 1L linear model, conversely, exhibits the poorest performance in the pretrained setting with an MAE of 1.21 meters and an MSE of 3.87 meters.
+
+\begin{table}[H]
+\centering
+\caption{Results finetuned on NBA with 1 player.}
+\label{fine:NBA}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear &  2L linear \\
+\hline\hline
+MAE (m) & 1.21 & 1.08 & 1.09 & \textbf{1.05} & 1.23 & 1.17 \\
+MSE (m) & 3.94 & 3.13 & 3.26 & \textbf{3.00} & 3.92 & 3.64 \\
+ADE (m) & 1.92 & 1.70 & 1.72 & 1.66 & 1.94 & \textbf{1.85} \\
+FDE (m) & 4.05 & 3.56 & 3.60 & \textbf{3.51} & 4.10 & 3.85 \\
+NL-ADE (m) & 2.45 & 2.20 & 2.23 & \textbf{2.17} & 2.44 & 2.31 \\
+AAE (grad) & 57.97 & \textbf{53.81} & 54.20 & 54.00 & 58.83 & 57.09 \\
+FAE (grad) & 69.15 & \textbf{65.30} & 66.58 & 66.19 & 70.65 & 68.19 \\
+\end{tabular}
+\end{table}
+
+Upon fine-tuning, the Transformer model retains its leading position, with an MAE of 1.05 meters and an MSE of 3.00 meters. The 1L linear model, however, shows a decline in performance after fine-tuning, with an MAE of 1.23 meters and an MSE of 3.92 meters.
+
+\subsubsection{Soccer Results}
+
+\begin{table}[H]
+\centering
+\caption{Results for SOC on pretrained with 1 player.}
+\label{pre:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.10 & \textbf{0.89} & 0.92 & 0.99 & 0.97 & 1.00 \\
+MSE (m) & 4.01 & \textbf{2.69} & 2.84 & 3.29 & 3.20 & 3.38 \\
+ADE (m) & 1.73 & \textbf{1.40} & 1.44 & 1.56 & 1.53 & 1.57 \\
+FDE (m) & 4.23 & \textbf{3.71} & 3.78 & 3.95 & 4.07 & 4.01 \\
+NL-ADE (m) & 1.99 & \textbf{1.66} & 1.69 & 1.83 & 1.78 & 1.85 \\
+AAE (grad) & 41.67 & \textbf{36.97} & 37.35 & 39.41 & 40.65 & 38.49 \\
+FAE (grad) & 66.10 & 61.49 & 61.60 & 63.25 & 70.21 & \textbf{61.11} \\
+\end{tabular}
+\end{table}
+
+For the Soccer dataset, the LMU model achieves the best results in the pretrained setting, with an MAE of 0.89 meters and an MSE of 2.69 meters. The BitNet model shows the least performance among pretrained models, with an MAE of 1.10 meters and an MSE of 4.01 meters.
+
+\begin{table}[H]
+\centering
+\caption{Results finetuned on SOC with 1 player.}
+\label{fine:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.08 & \textbf{0.92} & 0.93 & 0.97 & \textbf{0.92} & 0.99 \\
+MSE (m) & 3.90 & \textbf{2.78} & 2.99 & 3.25 & 2.99 & 3.22 \\
+ADE (m) & 1.71 & \textbf{1.45} & 1.46 & 1.53 & 1.46 & 1.56 \\
+FDE (m) & 4.18 & \textbf{3.79} & 3.80 & 3.91 & 3.90 & 3.99 \\
+NL-ADE (m) & 1.95 & \textbf{1.67} & 1.73 & 1.82 & 1.73 & 1.80 \\
+AAE (grad) & 41.31 & 37.87 & \textbf{37.74} & 38.90 & 39.61 & 38.06 \\
+FAE (grad) & 64.91 & 62.55 & 61.93 & 61.84 & 67.87 & \textbf{61.38} \\
+\end{tabular}
+\end{table}
+
+After fine-tuning, the LMU model continues to perform best with an MAE of 0.92 meters and an MSE of 2.78 meters. The LSTM model, despite its strong performance during pretraining, shows an increase in error after fine-tuning, with an MAE of 0.93 meters and an MSE of 2.99 meters.
+
+\subsection{Single Player vs. All Players Prediction}
+\label{exp:single_vs_all}
+
+This section evaluates model performance when predicting the target player's behavior using either all available player information or only the target player's information. This experiment addresses research question \textbf{Q6} and involves training separate models for each scenario and evaluating them on the same test dataset. For direct comparison, the results from Sections \ref{exp:init} and \ref{exp:transf} are utilized.
+
+\subsubsection{NBA}
+
+In the NBA dataset, the comparison between the models trained with all-player input and single-player input reveals that complex models generally benefit from the full input, while linear models tend to perform better with only the target player's data. Specifically, BitNet shows the most significant decline in performance when information from other players is removed, with the Average Displacement Error (ADE) increasing from 1.82 to 1.93 meters. This trend is consistent across other metrics.
+
+The Transformer and LMU models demonstrate relatively stable performance when the information from other players is removed, resulting in only slight decreases in performance. However, the Transformer consistently outperforms the LMU model in both scenarios. In summary, the Transformer leads in performance overall, while the one-layer linear model exhibits the poorest results.
+
+\subsubsection{Soccer}
+
+For the Soccer dataset, comparisons between the models using all-player input and single-player input reveal that most models perform better with less information. Notably, BitNet and the Transformer benefit from having data from multiple players. The LSTM model shows considerable improvement when only using the target player's input, with the MAE decreasing from 2.26 to 0.92 meters and the average error from 3.59 to 1.44 meters. Similar improvements are observed across other metrics.
+
+The LMU model remains the most stable, performing well with both all-player and single-player inputs, and maintains its position as the top model in both cases. The Transformer, while performing similarly to the LMU with full-player input (in second place), significantly underperforms with only the target player's data, only surpassing BitNet and competing with the two-layer linear model. Linear models show improved performance with single-player input setups, with ADE values of 1.53 and 1.57 meters, outperforming BitNet and competing with the Transformer. Overall, attention-based models like the Transformer and BitNet are most affected by the absence of information from other players.
+
+\subsubsection{Summary}
+
+In conclusion, the LMU model demonstrates consistent performance across both input scenarios, remaining stable with less information and performing well in both NBA and Soccer datasets. While it is not the top performer in the NBA scenario, it remains competitive. In the Soccer dataset, the LMU model excels, outperforming all other models with both input setups.

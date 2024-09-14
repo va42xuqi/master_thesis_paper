@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results finetuned on NBA with 1 player.}
+\label{fine:NBA}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear &  2L linear \\
+\hline\hline
+MAE (m) & 1.21 & 1.08 & 1.09 & 1.05 & 1.23 & 1.17 \\
+MSE (m) & 3.94 & 3.13 & 3.26 & 3.00 & 3.92 & 3.64 \\
+ADE (m) & 1.92 & 1.70 & 1.72 & 1.66 & 1.94 & 1.85 \\
+FDE (m) & 4.05 & 3.56 & 3.60 & 3.51 & 4.10 & 3.85 \\
+NL\_ADE (m) & 2.45 & 2.20 & 2.23 & 2.17 & 2.44 & 2.31 \\
+AAE (grad) & 57.97 & 53.81 & 54.20 & 54.00 & 58.83 & 57.09 \\
+FAE (grad) & 69.15 & 65.30 & 66.58 & 66.19 & 70.65 & 68.19 \\
+\end{tabular}
+\end{table}

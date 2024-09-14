@@ -1,0 +1,17 @@
+\begin{table}[H]
+\centering
+\caption{Results finetuned on SOC with 1 player.}
+\label{fine:SOC}
+\begin{tabular}{l||c|c|c|c|c|c}
+
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline\hline
+MAE (m) & 1.08 & 0.92 & 0.93 & 0.97 & 0.92 & 0.99 \\
+MSE (m) & 3.90 & 2.78 & 2.99 & 3.25 & 2.99 & 3.22 \\
+ADE (m) & 1.71 & 1.45 & 1.46 & 1.53 & 1.46 & 1.56 \\
+FDE (m) & 4.18 & 3.79 & 3.80 & 3.91 & 3.90 & 3.99 \\
+NL\_ADE (m) & 1.95 & 1.67 & 1.73 & 1.82 & 1.73 & 1.80 \\
+AAE (grad) & 41.31 & 37.87 & 37.74 & 38.90 & 39.61 & 38.06 \\
+FAE (grad) & 64.91 & 62.55 & 61.93 & 61.84 & 67.87 & 61.38 \\
+\end{tabular}
+\end{table}

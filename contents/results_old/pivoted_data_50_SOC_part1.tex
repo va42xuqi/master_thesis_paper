@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\caption{Results for Soccer (Part 1).}
+\label{init: SOC1}
+\begin{tabular}{l||c|c|c}
+Metric & BitNet & LMU & LSTM \\
+\hline \hline
+MAE (m) & 1.07 \pm 0.86 & \textbf{0.91 \pm 0.64} & 2.26 \pm 1.53 \\
+MSE (m) & 3.72 \pm 6.70 & \textbf{2.56 \pm 4.25} & 12.29 \pm 16.81 \\
+ADE (m) & 1.69 \pm 1.35 & \textbf{1.43 \pm 0.99} & 3.59 \pm 2.40 \\
+FDE (m) & 4.07 \pm 3.24 & \textbf{3.62 \pm 2.74} & 6.76 \pm 4.60 \\
+NL\_ADE (m) & 1.92 \pm 1.42 & \textbf{1.63 \pm 1.08} & 3.72 \pm 2.53 \\
+AAE (grad) & 39.81 \pm 44.17 & \textbf{36.87 \pm 42.21} & 81.18 \pm 54.38 \\
+FAE (grad) & 62.43 \pm 50.09 & 60.60 \pm 50.25 & 80.59 \pm 54.48 \\
+\end{tabular}
+\end{table}

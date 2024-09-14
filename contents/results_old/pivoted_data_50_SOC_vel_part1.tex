@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\caption{Results for Soccer using velocity only input.}
+\label{vel:SOC1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM & Transformer & 1L linear & 2L linear \\
+\hline \hline
+MAE (m) & 1.84 & \textbf{0.83} & 0.89  & 0.94 & 0.93 & 1.01 \\
+MSE (m) & 8.18 & \textbf{2.36} & 2.69 & 2.93 & 2.87 & 3.26 \\
+ADE (m) & 2.90 & \textbf{1.31} & 1.41 & 1.48 & 1.47 & 1.59 \\
+FDE (m) & 5.75 & \textbf{3.46} & 3.62 & 3.75 & 3.84 & 3.97  \\
+NL\_ADE (m) & 2.99 & \textbf{1.58} & 1.67 & 1.73 & 1.71 & 1.81 \\
+AAE (grad) & 54.40 & \textbf{34.36} & 35.55& 36.56  & 38.51  & 38.13 \\
+FAE (grad) & 70.59 & \textbf{57.43} & 58.84 & 58.51 & 65.76 & 61.27 \\
+\end{tabular}
+\end{table}

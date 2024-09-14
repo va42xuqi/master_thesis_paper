@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\caption{Results for Soccer using position only input.}
+\label{pos:SOC1}
+\begin{tabular}{l||c|c|c|c|c|c}
+Metric & BitNet & LMU & LSTM& Transformer & 1L linear & 2L linear \\
+\hline \hline
+MAE (m) & 2.29 & \textbf{1.16} & 2.27 & 1.25 & 1.87 & 1.61 \\
+MSE (m) & 12.41 & \textbf{3.89 } & 12.18  & 4.69 & 8.29 & 6.93 \\
+ADE (m) & 3.63 & \textbf{1.84} & 3.59 & 1.98 & 2.93 & 2.54 \\
+FDE (m) & 6.88 & \textbf{4.32} & 6.76 & 4.49 & 6.07 & 5.22 \\
+NL\_ADE (m) & 3.74 & \textbf{2.00} & 3.71 & 2.18 & 3.01 & 2.68 \\
+AAE (grad) & 77.64 & 44.13 & 77.86 & \textbf{43.96} & 69.28 & 53.01 \\
+FAE (grad) & 74.17 & 67.48 & 75.13 & \textbf{64.72} & 76.83 & 70.18 \\
+\end{tabular}
+\end{table}

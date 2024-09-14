@@ -1,0 +1,17 @@
+\chapter{Limitations}
+
+While this thesis presents significant advancements in the forecasting of human motion in sports using hybrid models with LMU encoders and Transformer architectures, there are several limitations that should be acknowledged:
+
+\begin{itemize}
+    \item \textbf{Data Dependency:} The models developed in this thesis rely heavily on the availability and quality of the input data. In particular, the accuracy of the forecasts is contingent on the granularity and consistency of the data. Any noise or inconsistencies in the input data can negatively impact the model's performance. Furthermore, the models are currently optimized for datasets with high temporal resolution, and their effectiveness may diminish when applied to datasets with lower temporal granularity.
+
+    \item \textbf{Computational Complexity:} The advanced models, particularly the Transformer-based architectures, require substantial computational resources. This includes significant memory usage and processing power, which may limit their deployment in real-time applications, especially in resource-constrained environments. The need for high computational power could also pose challenges when scaling the models for use in more extensive, more complex scenarios.
+
+    \item \textbf{Generalization Across Sports:} Although the models have shown promise in forecasting player movements in specific sports, their ability to generalize across different sports remains uncertain. Each sport has unique dynamics and motion patterns, and a model trained on one sport may not perform as well when applied to another without significant retraining. This limits the models' versatility and highlights the need for further research into cross-sport generalization.
+
+    \item \textbf{Model Interpretability:} While the models achieve high accuracy, their complexity can make them difficult to interpret. Understanding the internal decision-making process of these models is challenging, which may be a barrier to their acceptance in critical applications where transparency is required. Developing methods to interpret and explain the model's predictions remains an area for future work.
+
+    \item \textbf{Limited Real-Time Testing:} The models were primarily evaluated in offline settings, where predictions were made based on pre-collected datasets. Although these evaluations are valuable, the performance of the models in real-time scenarios, such as live sports games, has not been thoroughly tested. This gap between offline and real-time performance needs to be addressed to ensure the models' practical applicability in live settings.
+\end{itemize}
+
+These limitations suggest areas where further research and development are needed to enhance the robustness, generalizability, and practical utility of the models proposed in this thesis.

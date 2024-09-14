@@ -1,0 +1,35 @@
+\chapter{Related Work}
+
+\section{Human Motion Forecasting}
+In this section, we review the literature on forecasting human motion in dynamic environments, focusing on both model-based and data-driven methods. We explore their strengths, limitations, and areas where further research is needed.
+
+\subsection{Model-Based Methods}
+\label{sec:model_based_methods}
+Model-based methods, such as \glspl{kf} and \glspl{pf}, have been foundational in human motion forecasting. \gls{kf} and \gls{pf} are effective in linear systems but struggle with nonlinearities and rapid changes typical of dynamic environments like sports \cite{diss_tobi}.
+
+\glspl{kf} are designed for linear systems and can become less accurate when dealing with the nonlinear and rapidly changing nature of human motion. \glspl{pf} offer more flexibility and can handle nonlinear systems better, but they require significant computational resources, which can limit their practicality in real-time applications.
+
+Feigl et al. \cite{diss_tobi} highlight that both \gls{kf} and \gls{pf} face challenges in adapting to rapid and unpredictable changes in speed and acceleration. These methods often fail to capture complex, nonlinear patterns present in dynamic environments, which can lead to suboptimal forecasting performance.
+
+\subsection{Data-Driven Methods}
+\label{sec:data_driven_methods}
+Data-driven methods, particularly those leveraging \gls{ai}, have introduced significant advancements in forecasting capabilities. These methods include \gls{rnn} like \gls{lstm} networks and Transformer architectures. \glspl{lstm} \cite{lstm} are designed to handle sequential data and long-term dependencies but have limitations with very long time sequences. They may struggle with retaining information over extended time periods, which can impact their performance in forecasting tasks requiring long-term memory \cite{lmu}. The \gls{lmu} \cite{lmu} was developed to address these limitations by improving long-term memory retention. However, \glspl{lmu} also have their drawbacks, including performance variations across different tasks \cite{gosalci}. Transformers, with their self-attention mechanisms, offer improvements in processing complex data and handling longer sequences \cite{transformer}. Models such as Chat-GPT \cite{gpt} and TimeGPT \cite{timegpt} demonstrate their effectiveness in various domains, but their application to human motion forecasting is still emerging. Giuliari et al. \cite{giuliari2020transformer} are among the first to evaluate Transformers for human motion, but their study focuses on static motion data. The adaptability of Transformers to dynamic motion scenarios, such as those in sports, remains unclear.
+
+Recent adaptations like BitNet \cite{BitNet2023} and \gls{retnet} \cite{RetNet} aim to address some of the limitations of Transformers, such as high computational complexity and long inference times. BitNet uses 1-bit weights to reduce computational requirements, while \glspl{retnet} enhances training and inference speed. Despite these improvements, challenges remain in effectively combining these methods and assessing their performance in complex, multi-tasking environments like sports.
+
+\section{Related Fields}
+This section examines the application of forecasting models in specific domains and highlights their limitations and potential for improvement.
+
+\subsection{Model-Based Methods}
+\label{sec:related_subject}
+In sports forecasting, such as \gls{nba}, model-based approaches have been applied to predict player trajectories. Hauri et al. \cite{MBT} use \gls{lstm} networks to forecast potential trajectories and associated probabilities. While their approach shows promise, it is limited in several ways.
+
+First, the \gls{lstm} model employed by Hauri et al. focuses on individual player trajectories, which may overlook the interactions between multiple players. This approach assumes that each player's motion can be independently predicted, potentially missing out on valuable contextual information provided by the movements of other players. The impact of incorporating information from all players into the model is not well explored, and it is unclear how including such interactions would improve forecasting accuracy.
+
+Second, the model's reliance on recent data over older data can lead to the omission of significant events that occurred just moments before. This limitation could affect the model's ability to accurately predict trajectories in scenarios where historical context plays a crucial role.
+
+\subsection{Data-Driven Models}
+\label{sec:related_models}
+Data-driven models, particularly those based on Transformers, have shown potential in various forecasting tasks but face several limitations in the context of dynamic human motion forecasting. Although Transformers offer improved handling of complex data and long-term dependencies, their application to human motion forecasting, especially in sports, is still under investigation. Existing Transformer models, such as those developed by Giuliari et al. \cite{giuliari2020transformer}, are primarily tested on static motion data. The adaptation of Transformers to dynamic, real-time motion scenarios remains uncertain.
+Moreover, while BitNet \cite{BitNet2023} and \gls{retnet} \cite{RetNet} address some of the computational and inference challenges associated with Transformers, their performance in dynamic and multi-tasking environments like sports is not yet fully understood. The combination of these adaptations and their effectiveness in improving forecasting accuracy and robustness in complex scenarios is an area requiring further research.
+

@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\caption{Results for Soccer using position only (Part 2).}
+\label{pos:SOC2}
+\begin{tabular}{l||c|c|c}
+Metric & Transformer & 1L linear & 2L linear \\
+\hline \hline
+MAE (m) & 1.25 \pm 0.97 & 1.87 \pm 1.16 & 1.61 \pm 1.19 \\
+MSE (m) & 4.69 \pm 7.90 & 8.29 \pm 12.93 & 6.93 \pm 11.04 \\
+ADE (m) & 1.98 \pm 1.52 & 2.93 \pm 1.80 & 2.54 \pm 1.86 \\
+FDE (m) & 4.49 \pm 3.43 & 6.07 \pm 3.84 & 5.22 \pm 3.87 \\
+NL\_ADE (m) & 2.18 \pm 1.59 & 3.01 \pm 1.94 & 2.68 \pm 1.94 \\
+AAE (grad) & \textbf{43.96 \pm 45.15} & 69.28 \pm 49.60 & 53.01 \pm 48.02 \\
+FAE (grad) & \textbf{64.72 \pm 50.51} & 76.83 \pm 49.11 & 70.18 \pm 51.82 \\
+\end{tabular}
+\end{table}
