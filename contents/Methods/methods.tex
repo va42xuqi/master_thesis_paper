@@ -1,134 +1,120 @@
-\chapter{Methods}
+\chapter{Method}
 \label{chapt:method}
 
-This chapter outlines the methods and processes used to develop and evaluate the predictive models for player and ball movements in sports data. Section \ref{sec:idea_pipeline} introduces the overarching idea and the pipeline employed, setting the stage for the modeling approach. Section \ref{sec:preprocessing} details the data pre-processing techniques essential for preparing the raw input data for model training. Sections \ref{sec:main_proc} and \ref{sec:postprocessing} then delve into the specific models and post-processing techniques used to convert the model outputs into meaningful, real-world predictions.
+This Chapter outlines the methods and processes used to develop and evaluate the predictive models for player and ball movements in sports data. Section \ref{sec:idea_pipeline} introduces the overarching idea and the pipeline employed, setting the stage for the modeling approach. Section \ref{sec:preprocessing} details the data pre-processing techniques essential for preparing the raw input data for model training. Sections \ref{sec:main_proc} and \ref{sec:postprocessing} then delve into the specific models and post-processing techniques used to convert the model outputs into meaningful, real-world predictions.
 
 \section{Idea and Pipeline}
 \label{sec:idea_pipeline}
-\todo{better visual illustration}
-The primary goal of this thesis is to develop a robust pipeline for forecasting player movements in dynamic sports environments, such as basketball and soccer, where traditional methods like \glspl{kf} and \glspl{pf} often fall short due to the complexity and nonlinearity of the data. This research addresses these challenges by leveraging advanced \glspl{nn} that excel in capturing temporal dependencies and complex patterns in multivariate time series data.
-
-The proposed pipeline is structured into three main stages:
-\begin{itemize}
-    \item \textbf{Pre-processing:} Transform and segment raw data for model training, deciding whether to use data from all players, a single target, or both.
-    \item \textbf{Main-processing:} Feed preprocessed data into various neural networks, including LSTM, LMU, Transformers, and BitNet, to handle different aspects of trajectory prediction.
-    \item \textbf{Post-processing:} Convert predicted velocities back to positional data for practical applications like game strategy and player analysis.
-\end{itemize}
-
-
-This pipeline introduces several innovations to sports analytics: it integrates a broader range of advanced neural models, emphasizes multivariate and multi-task forecasting, and incorporates contextual game information to improve prediction accuracy. These innovations enhance both the robustness and efficiency of player movement predictions, contributing to more informed decision-making in sports. The Diagram \ref{fig:pipeline} shows the preocess graphically.
-
-\begin{figure}[t]
+\begin{figure}[H]
     \centering
-\begin{tikzpicture}[node distance=2.5cm and 4cm, every node/.style={font=\small}]% Nodes
-% Nodes
-\node (start) [startstop] {Start};
-\node (collect) [process, right of=start, xshift=2cm] {collect Data};
-\node (flatten) [process, right of=collect, xshift=2cm] {flatten Data};
-\node (prepare) [process, below of=flatten] {add velocity information};
-\node (feed) [process, left of=prepare, xshift=-2cm] {feed into model};
-\node (out) [process, left of=feed, xshift=-2cm] {get output velocity};
-\node (post) [process, below of=out] {transfer back to position};
-\node (metrics) [process, right of=post, xshift=2cm] {calculate metrics};
-\node (stop) [startstop, right of=metrics, xshift=2cm] {End};
-
-% Arrows
-\draw [arrow] (start) -- (collect);
-\draw [arrow] (collect) -- (flatten);
-\draw [arrow] (flatten) -- (prepare);
-\draw [arrow] (prepare) -- (feed);
-\draw [arrow] (feed) -- (out);
-\draw [arrow] (out) -- (post);
-\draw [arrow] (post) -- (metrics);
-\draw [arrow] (metrics) -- (stop);
-\end{tikzpicture}
+    \includesvg[width=1\linewidth]{contents//Basics/pipeline.svg}
     \caption{Overview of the predictive modeling pipeline for sports data.}
     \label{fig:pipeline}
 \end{figure}
+The primary objective of this thesis is to develop a robust pipeline for forecasting player movements in dynamic sports environments, such as basketball and soccer. Traditional methods, such as \glspl{kf} and \glspl{pf}, often fall short due to the complexity and nonlinearity of the data in these scenarios. This research aims to address these challenges by employing advanced \glspl{nn} capable of capturing temporal dependencies and intricate patterns in multivariate time series data. The proposed pipeline consists of three main stages:
+\\ \\
+\textbf{Pre-processing:} Transform raw data from all datasets into a unified structure. Additionally, the pre-processing step split the data into sliding windows for use in the main process. The process is described in Section \ref{sec:preprocessing}.
+\\ \\
+\textbf{Main-processing:} This stage encompasses training, validation, and testing of the model. Detailed steps for ensuring reproducibility are provided in Section \ref{sec:main_proc}.
+\\ \\
+\textbf{Post-processing:} The raw model outputs are refined to improve readability and interpretability. Section \ref{sec:postprocessing} details the main steps for converting the outputs into a more human-friendly format.
 
 \section{Pre-processing}
 \label{sec:preprocessing}
-The input to the models consists of tensors representing the 2D positional and velocity data of all players and the ball for either NBA or soccer games. To preprocess this data, several parameters must be set initially. The parameter \(steps_{in}\) determines the amount of historical context provided as input, where one timestep corresponds to 0.04 seconds. The trajectory data is split into rolling windows of size \(size_{in}\).
 
-Additionally, to incorporate information relative to the two baskets in NBA or the two goals in soccer, the position and velocity information for each player, the ball, and the baskets/goals are concatenated with the rest of the data. This results in \(4 \times (\text{num\_players} + 3)\) pieces of information per timeframe.
+\begin{figure}
+    \centering
+    \includesvg[width=1\linewidth]{contents//Basics/block_plain.svg}
+    \caption[Illustration of the rolling window process with colored windows and increased step size for clarity.]{Illustration of the rolling window process. Different sliding windows are highlighted using distinct colors: red, green, and blue, to differentiate between them. For illustration purposes, the step size is increased to 4, allowing for clearer visualization of the overlapping windows. Multiple trajectories are shown, with those in the background having reduced opacity and gradually fading out, creating a sense of depth as they move leftward and downward.}
+    \label{fig:preprocessing}
+\end{figure}
 
-Several considerations for pre-processing include:
+The first step of the pre-processing involves collecting all relevant data and transforming it into a unified structure. This process not only ensures consistency but also simplifies the main processing stage (refer to Section \ref{sec:main_proc}), as it requires consideration of only one unique data structure. The output of this pre-processing step is a 3D structure with the shape \texttt{[num\_timesteps, num\_objects, num\_features]} for each trajectory. Here, \texttt{num\_timesteps} corresponds to the duration of each trajectory, \texttt{num\_objects} represents all relevant entities in the scene—specifically, Team 1, followed by Team 2, the ball, Team 1's goal/basket, and Team 2's goal/basket—and \texttt{num\_features} denotes the attributes of that scene. Both datasets are sampled at 25 Hz, so the resulting dataset retains this sampling rate, with each trajectory reflecting 25 samples per second. In both the NBA and DFL datasets, there are four features: two-dimensional absolute position (from the midpoint) and absolute velocity information per timestep. The detailed processes for the NBA and DFL datasets are described in Sections \ref{sect:data-prep} and \ref{sect:data-prep-soccer}, respectively.
 
-\subsection{All Players vs. One Player}
+An additional task within the pre-processing phase involves splitting the dataset into two distinct subsets: training and testing. The training set encompasses all data required for training and validation (in a 90-10 split), while the test dataset is derived from a single game of the respective sport (See Sections \ref{sect:data-prep} and \ref{sect:data-prep-soccer}). This pre-separation ensures that the training step is entirely uninformed about the test game, maintaining the integrity of the evaluation. It is important to note that we shuffle trajectories from the training dataset only, as this is not necessary for validation and not desired for~testing.
 
-The data can include either all players or focus on a single target player. When considering all players, the input tensor includes the positional and velocity data for each player, the ball, and the baskets/goals. When focusing on one player, only the positional and velocity data of the target player, the ball, and the baskets/goals are used.
+\parbox{\textwidth}{
+The final step of the preprocessing involves segmenting each trajectory into a series of windows using a sliding window technique, characterized by a length \texttt{window\_size} and a step size of \texttt{step\_size}. In this thesis, \texttt{window\_size} is defined as the sum of \texttt{history\_length}, representing the amount of context information provided to the model, and \texttt{prediction\_length}, indicating the number of steps the model is tasked with predicting. The \texttt{step\_size} is set to \texttt{1}, thus capturing every possible window. Consequently, each trajectory is divided into multiple overlapping windows of length \texttt{window\_size}, resulting in two tensors: one input tensor of shape \texttt{[num\_batches, history\_length, num\_objects, num\_features\_in]} and one output tensor of shape \texttt{[num\_batches, prediction\_length, num\_objects, num\_features\_out]}, prepared for the main-processing stage (see Figure \ref{fig:preprocessing} for a visual representation).
+}
 
-\subsection{Positional Only vs. Velocity Only}
+\texttt{num\_batches} denotes the total number of windows extracted from the trajectory data during the sliding window process. The parameter \texttt{history\_length} specifies how many timesteps are used as input context for the model, while \texttt{prediction\_length} refers to the number of timesteps the model is expected to predict. \texttt{num\_objects} represents all relevant entities, and \texttt{num\_features\_in} and \texttt{num\_features\_out} correspond to the attributes (such as position and velocity) that are considered for each object within each~timestep. While $\texttt{num\_features\_in}$ varies depending on the experiment conducted (see Section \ref{sec:experiments}), \texttt{num\_features\_out} is consistently set to $2$ across all experiments, representing the ground truth velocities (\(v_x\) and \(v_y\)).
 
-This consideration determines whether only positional data or only velocity data is used as input. If using positional data only, the input tensors consist of the x and y coordinates of the players, the ball, and the baskets/goals. Conversely, if using velocity data only, the input tensors consist of the x and y components of the velocity vectors of the players, the ball, and the baskets/goals.
-
-\subsection{Univariate vs. Multivariate Models}
-
-In the preprocessing step, there are two main approaches to structuring the input data: univariate and multivariate models. These approaches differ in how the x and y components (position and velocity) are handled.
-
-\paragraph{Univariate Models}
-In univariate models, separate predictors are used for the x and y components. The input data is split into four separate input tensors: \(x_{pos}\), \(y_{pos}\), \(x_{vel}\), and \(y_{vel}\). Each predictor specializes in one dimension, with one predictor handling the x-axis (using \(x_{pos}\) and \(x_{vel}\)) and the other handling the y-axis (using \(y_{pos}\) and \(y_{vel}\)). The final prediction is obtained by combining the outputs of both predictors.
-
-\paragraph{Multivariate Models}
-In multivariate models, the input data for both positional and velocity components across x and y axes are combined into a single input tensor. This allows a single model to process the combined data and predict both the x and y velocity components simultaneously. This approach can capture interactions between the x and y dimensions if such dynamics are correlated.
-
-\paragraph{Note on Linear Models}
-Univariate models are currently not implemented for linear models, and their applicability remains undetermined.
-
-
-Depending on the specific case and requirements of the model, the pre-processing steps will be adjusted accordingly to handle these different scenarios.
 
 \section{Main Processing}
 \label{sec:main_proc}
-In the main processing step, each model is designed to predict velocities from the input data. These predicted velocities are then used in the post-processing step to update positions. Here is a detailed explanation of the processing steps for each model type:
 
-\subsection{Linear Models}
-Linear models consist of one or two linear layers. The variations of these models are as follows:
+\parbox{\textwidth}{
+With the data now preprocessed (refer to Section \ref{sec:preprocessing}), we can proceed to the main-processing stage, where our objective is to develop competitive trajectory predictors. The desired output from each model is $\texttt{num\_features\_out} = 2$, representing the predicted velocities  (\(\hat{v}_x\) and \(\hat{v}_y\)). This Section outlines the methodology used for training the~models.
+In the main-processing phase, we train models utilizing the \gls{mse} as the loss function, defined in \ref{eq:mse}. Every model outputs a vector of size \texttt{num\_features\_out} $\times$ \texttt{prediction\_length}. This output will be reshaped to \texttt{[batch\_size, prediction\_length, num\_features\_out]}. With this reshaped output, we can calculate the mean squared error (\gls{mse}) metric to compare the predicted results with the ground truth velocities (\(v_x\) and \(v_y\)), which is obtained from the pre-processing phase described in Section \ref{sec:preprocessing}. While the \gls{mse} serves as a performance metric during training, primarily facilitating model optimization rather than direct evaluation for the front end. To ensure the best-performing model is retained, we employ the \texttt{ModelCheckpoint} callback from the \texttt{Lightning} library. This callback is configured to save the model corresponding to the epoch with the lowest \gls{mse}. Additionally, we implement an \texttt{EarlyStopping} callback with a patience of 20 epochs, allowing the training process to halt if no improvement is observed over this interval, thus preventing~overfitting.
+We train each model using the \texttt{lightning.pytorch.Trainer} module. The \texttt{max\_epochs} parameter is set to $-1$, indicating that training will only terminate upon triggering the early stopping mechanism. To manage extreme gradient values, we employ a \texttt{gradient\_clip\_val} of $0.5$. The training strategy is set to ``auto'', enabling the \texttt{Lightning} framework to select the most suitable strategy for~training.
 
-\paragraph{One Layer Linear Model}
-The \gls{1ll} model consists of a single linear layer that transforms the input data into velocity predictions.
-
-\paragraph{Two Layer Linear Model}
-The \gls{2ll} model includes an initial linear layer followed by a non-linear activation function such as \gls{relu}, a dropout layer, and a final linear layer.
-
-\subsection{Recurrent Models}
-
-\paragraph{Long Short-Term Memory Model}
-The \gls{lstm} model starts with an \gls{lmu} layer followed by an \gls{lstm} layer, with a final linear layer producing velocity predictions.
-
-\paragraph{Legendre Memory Unit Model}
-The \gls{lmu} model starts with an \gls{lmu} layer followed by another \gls{lmu} layer, with a final linear layer generating velocity predictions.
-
-\subsection{Complex Models}
-
-\paragraph{Transformer Model}
-The Transformer Model starts with an \gls{lmu} layer, followed by a Transformer network and a final linear layer that produces the velocity predictions.
-
-\paragraph{BitNet Model}
-The BitNet Model starts with an \gls{lmu} layer, followed by BitNet and a final linear layer.
-
-\subsection{Special Cases}
-For all models, there are a few special cases:
-
-\begin{itemize}
-    \item \textbf{Position-Only Version:} Processes only positional data (x and y coordinates).
-    \item \textbf{Velocity-Only Version:} Processes only velocity data (x and y components).
-    \item \textbf{Full Version:} Utilizes both positional and velocity data.
-    \item \textbf{Univariate Version:} Processes each dimension (x and y) separately, with results concatenated and reshaped. Note that univariate versions are not implemented for linear models.
-\end{itemize}
+In summary, the main processing phase is centered around refining the predicted velocities  (\(\hat{v}_x\) and \(\hat{v}_y\)), with each model aiming to output $\texttt{num\_features\_out} = 2$.}
 
 
-\section{Post Processing}
+\subsection{Linear Model Details}
+Linear models are among the simplest machine learning algorithms, primarily capable of detecting linear dependencies. Given their inherent limitations in handling non-linear relationships and temporal dynamics, we anticipate these models will perform relatively poorly compared to more complex architectures. However, their simplicity results in smaller training and inference times, making them a useful baseline for comparison with other tested models.
+
+We implemented two variations of the linear layer: one-layer and two-layer linear layers. Since the linear layer cannot explicitly account for time dependencies, we flatten the data, transforming each timestep into an embedded feature. This approach restricts the model's flexibility in capturing varying temporal patterns. Consequently, the models can only be evaluated with the same historical context they were trained on, limiting their adaptability to different prediction lengths. While this architecture allows the model to process all timesteps simultaneously and predict every timestep at once, it may confuse linear models due to the lack of nuanced temporal context.
+
+\paragraph{One-Layer Linear Model:}
+\label{sec:1ll-details}
+The \gls{1ll} is the simplest architecture, comprising only the input and output layers, with no hidden layers. This model can exclusively learn linear dependencies, and we expect it to perform poorly in predicting movements in the NBA and DFL datasets due to its inability to capture non-linear interactions and temporal variations. The Linear Layer takes an input with input size \texttt{num\_features\_in} $\times$ \texttt{num\_objects} $\times$ \texttt{history\_length} and returns an output of size \texttt{num\_features\_out} $\times$ \texttt{prediction\_length}.
+
+\paragraph{Two-Layer Linear Model:}
+\label{sec:2ll-details}
+The gls{2ll} model introduces slightly more complexity, offering a better baseline for comparison. It consists of two linear layers, as discussed in Section \ref{sect:linear}. The first layer transforms the input of size \texttt{num\_features\_in} $\times$ \texttt{num\_objects} $\times$ \texttt{history\_length} to a hidden size of \texttt{hidden\_size}, while the second layer maps the hidden representation to an output size of \texttt{num\_features\_out} $\times$ \texttt{prediction\_length}. While this model may still struggle with accurate predictions, the inclusion of a hidden layer allows for a more nuanced representation of the data. To address the challenges faced by linear models, we incorporated a dropout layer with a dropout rate of \texttt{dropout\_rate} and employed the Gaussian Error Linear Unit (GELU) as a non-linear activation function. This setup aims to enhance the model's capability to capture relationships within the data, although it remains fundamentally limited in handling complex temporal dependencies.
+
+\subsection{Recurrent Model  Details}
+In contrast to linear models, recurrent models can explicitly process temporal dependencies by feeding each timestep sequentially. This recurrent behavior enhances the RNNs' ability to understand the input and manage non-linearities effectively. Several approaches have been proposed for solving human trajectories using RNN strategies, including Alahi et al.'s Social LSTM \cite{social-lstm} and Hauri et al.'s Multi-modal Basketball Trajectories (MBT)~model~\cite{MBT}.
+
+\paragraph{Long Short-Term Memory:} 
+\label{sec:lstm-details}
+Among the various recurrent architectures, we focus on the Long Short-Term Memory (LSTM) model, which excels in capturing long-range dependencies in sequential data. The LSTM model consists of two PyTorch LSTM layers, as described in Section \ref{sect:lstm}. The first LSTM layer processes the data from \texttt{num\_features} to \texttt{hidden\_size}, while the second LSTM layer maintains the dimensionality from \texttt{hidden\_size} to \texttt{hidden\_size}. Between the two LSTM layers, we introduce a dropout layer with a dropout rate of \texttt{dropout\_rate} to help mitigate overfitting. Both the initial and hidden states of the LSTMs are initialized with tensors of size \texttt{[1, batch\_size, hidden\_size]}. Finally, a fully connected (linear) layer transforms the output from \texttt{hidden\_size} to $\texttt{num\_features\_out} \times \texttt{forecast\_length}$, predicting all time steps at once.
+
+\paragraph{Legendre Memory Units:} 
+\label{sec:lmu-details}
+Following our exploration of LSTMs, we also investigate Legendre Memory Units (LMUs), which have shown promising results in similar tasks. The LMU model shares a similar architecture with the LSTM model. In this configuration, we replace the LSTM layers with LMU layers, as they have demonstrated promising results and often outperform LSTMs in various tasks \cite{gosalci, lmu}. We implemented Varma's version of the LMU in PyTorch \cite{torch-lmu}. As with the LSTM architecture, we utilize two LMU layers: the first layer processes data from \texttt{num\_features} to \texttt{hidden\_size}, while the second maintains the dimensionality from \texttt{hidden\_size} to \texttt{hidden\_size}, with a dropout layer of \texttt{dropout\_rate} placed between them. We initialize both LMU layers with an initial memory state of \texttt{None}, allowing them to automatically initialize their memory states with zero tensors. Both LMU layers share the same \texttt{memory\_size}, which corresponds to the number of degrees used for the Legendre polynomials (see Algorithm \ref{alg:ssm}). Typically, the LMU layers do not train the state-space matrices $A$ and $B$, retaining their initial values. However, the layer provides options \texttt{learn\_a} and \texttt{learn\_b} to enable training of these matrices if desired. We opted to train the transformation matrices, as this approach yielded slightly improved results in the initial phases of our work. Finally, a fully connected layer converts the output from the LMU back to the format of \texttt{num\_features\_out} $\times$ \texttt{forecast\_length} to predict all time steps at once.
+
+\subsection{Attention-Based Model Details}
+
+Moving beyond traditional approaches, attention-based models have gained traction across various tasks, particularly in Natural Language Processing (NLP), where they have become state-of-the-art \cite{gpt, bloom, opt, llama, bert, claude, gemini}. These models excel in handling sequential data and capturing long-range dependencies effectively.
+
+Furthermore, attention mechanisms are demonstrating competitive performance in other domains. In computer vision, Vision Transformers (ViTs) have showcased their superiority in image classification and have been successfully applied to tasks such as object detection and image segmentation \cite{dosovitskiy2020, carion2020}.
+
+In reinforcement learning, attention-based architectures have improved performance in tasks such as game playing and robotic control \cite{parisotto2017}. Additionally, they have proven effective in automatic speech recognition, where they often match or surpass traditional recurrent architectures in accuracy \cite{choromanski2020}. Attention mechanisms are also making strides in graph-based tasks, contributing to advancements in node classification and link prediction within graph neural networks \cite{velickovic2018}. Moreover, they facilitate multimodal learning, proving valuable in applications such as image captioning and video analysis by focusing on relevant input Sections \cite{chen2018}.
+
+While attention-based models are not yet widely adopted in human trajectory prediction in sports, their ability to focus on relevant features and capture complex relationships makes them a promising choice for our use case. Their capacity to model interactions between players and the ball over time, along with the flexibility to handle varying input sequences, positions attention-based models to potentially outperform traditional methods. This adaptability can be particularly beneficial in dynamic sports environments, where the relationships between entities are intricate and context-dependent. By leveraging attention mechanisms, we aim to enhance the accuracy of trajectory predictions, ultimately leading to better insights into player movements and strategies. In our implementation, we focus on two attention-based architectures: the encoder-only Transformer and the corresponding encoder-only BitNet.
+
+\paragraph{Transformer:}
+\label{sec:transformer-details}
+
+The transformer architecture, unlike RNNs, does not inherently account for the temporal position of each time frame. To address this, we implemented a convolutional layer to provide relative positional embedding information for the input (see Section \ref{sec:posenc}). Specifically, we utilized a 1D convolutional layer that convolves over the time axis to obtain the necessary relative position embeddings.
+
+In our model, we configured the convolutional layer with a kernel size of \texttt{kernel\_size}, a stride of \texttt{stride}, and padding set to \texttt{padding}, using the ``replicate'' mode. This convolutional layer transforms the number of channels from \texttt{num\_features\_in} $\times$ \texttt{num\_objects} to \texttt{hidden\_size}. Following this embedding, the encoder layer (refer to Section \ref{sect:trafo}) of the transformer consists of \texttt{n\_blocks} encoder blocks, which split the features into \texttt{n\_heads} attention heads. It is important to note that \texttt{n\_heads} must evenly divide \texttt{hidden\_size}. The encoder layer takes \texttt{hidden\_size} as input and outputs a tensor of the same shape, ensuring that the dimensionality of the input is preserved. Additionally, the size of each internal linear layer within the transformer model is determined by \texttt{ffn\_hiddens}. A final linear layer transforms the output of the transformer back into the format of $\texttt{num\_features\_out} \times \texttt{forecast\_length}$ to predict all time steps at once. The dropout rate used throughout the model is denoted as \texttt{dropout\_rate}.
+
+\paragraph{BitNet:}
+\label{sec:bitnet-details}
+
+We also consider the BitNet architecture as an efficient alternative to the transformer for trajectory prediction tasks. Similar to the transformer, BitNet employs an encoder-only structure but utilizes BitLinear layers, which operate exclusively with binary values (0s and 1s), allowing for efficient representation and computation (see~Section~\ref{sect:bitnet}).
+
+The architecture begins with a 1D convolutional layer to provide relative positional embeddings, configured with a kernel size of \texttt{kernel\_size}, a stride of \texttt{stride}, and padding of \texttt{padding}, transforming the input from \texttt{num\_features\_in} $\times$ \texttt{num\_objects} to \texttt{hidden\_size}. The encoder consists of \texttt{n\_blocks} encoder blocks that split features across \texttt{n\_heads}, ensuring \texttt{n\_heads} divides \texttt{hidden\_size}.
+
+The key distinction lies in the internal BitLinear layers, which process binary values while maintaining the encoder's overall functionality. Finally, a linear layer transforms the output back to the format of $\texttt{num\_features\_out} \times \texttt{forecast\_length}$ to predict all time steps at once. The dropout rate used throughout the model is denoted as \texttt{dropout\_rate}. We are testing this architecture to explore its potential for enhancing computational efficiency and model performance in our trajectory prediction tasks.
+
+
+\section{Post-processing}
 \label{sec:postprocessing}
 
-After obtaining the model predictions, which are trained to output velocities, a post-processing step is required to convert these velocities back to positions. This conversion is essential as the final goal is to predict the positional data.
+With the main processed data obtained from Section \ref{sec:main_proc}, we enter the post-processing phase. The output is a 3D tensor representing the velocity data (\(v_x\) and \(v_y\)) of the target player for each timestep and batch. The predicted velocities \( \mathbf{v}_{pred}(t) \) serve as the foundation for transforming the data back into positional information.
 
-Given the predicted velocities \( \mathbf{v}_{pred}(t) \) for time \( t \), the position at the next timestep can be computed using the following equation:
+The position at the next timestep is computed using the following equation:
+\begin{equation}
+    \setequationentry{Transformation of Velocity to Position}
+    \mathbf{p}(t+1) = \mathbf{p}(t) + \mathbf{v}_{\text{pred}}(t) \Delta t,
+\end{equation}
 
-\[
-\mathbf{p}(t+1) = \mathbf{p}(t) + \mathbf{v}_{pred}(t) \cdot \Delta t
-\]
+where \( \mathbf{p}(t) \) denotes the position at time \( t \), \( \mathbf{v}_{pred}(t) \) represents the predicted velocity at time \( t \), and \( \Delta t \) is the time interval between successive timesteps.
 
-In this equation, \( \mathbf{p}(t) \) denotes the position at time \( t \), \( \mathbf{v}_{pred}(t) \) represents the predicted velocity at time \( t \), and \( \Delta t \) is the time interval between successive timesteps.
+After converting velocities into positional data, this result is used to calculate the metrics outlined in Section \ref{sec:metrics}. These metrics provide useful benchmarks to evaluate each model's performance. They offer valuable quantitative insights and visualizations, aiding in assessing model effectiveness, as discussed in Chapter \ref{chapt:results}.
 
-This equation updates the position by adding the product of the predicted velocity and the time interval to the current position, thus converting the velocity predictions back into positional data.
+

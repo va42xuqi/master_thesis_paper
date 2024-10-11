@@ -21,10 +21,14 @@
 \usepackage{needspace}
 \usepackage{ragged2e}
 \usepackage{placeins}
-\usepackage{stfloats}
+\usepackage{xcolor}
+\usepackage{svg}
+\usepackage[stretch=10]{microtype}
 \usepackage{subcaption}
 \usepackage[ruled,vlined]{algorithm2e}
-
+\usepackage{lmodern}
+\usepackage{unicode-math}
+\usepackage{siunitx}
 
 %%%%%%%%%% CONFIGURATION %%%%%%%%%%
 \thesistype{\Master} % Or \Master or a custom string
@@ -38,10 +42,11 @@
 \institute{\FAUIPSG}
 \instituteloc{Erlangen}
 \thesissupervisor{Tobias Feigl} % Can be used multiple times
+\thesissupervisor{Michael Philippsen}
 
 % Fill in the following according to the entry in UnivIS for the thesis
 \begin{thesisbackground}
-Forecasting methods for the stock market, electricity prices, or weather and climate are ubiquitous and are extensively researched [1]. However, forecasting human motion in sports is only sparsely researched. Here too, forecasting technology is crucial to compress system delays at an early stage, reduce injuries, achieve tactical advantages [2] and, in short, improve analysis before, during, and post-game [3]. For instance, coaches draw more effective decisions, such as switching players for health reasons due to irregular motion. The demand for forecasting methods is currently increasing with newly emerging communication platforms, e.g., 6G, and the Internet of Things. However, forecasting human motion, especially their positions, is a difficult task as human motion is practically indeterministic. Scenarios with fast and unpredictable human motion, e.g., in sports such as NBA basketball, render forecasting virtually impossible. So, experts explore forecasting models that can accurately, reliably, promptly, and as far as possible forecast people’s future motion in complex and dynamic environments. For this purpose, classic Bayesian methods such as Kalman and particle filters (KF, PF) [4] were developed. However, these linear models do not remember the motion history necessary to forecast more than just a single time step of the future. In sport, KF and PF are practically ineffective when people move with rapid changes in speed and acceleration and influence each other (tactically) during the course of the game. That is why promising AI approaches have recently been explored. These methods have the potential to exploit nonlinear patterns in dynamic, complex motion that even experts miss as their nonlinear learning capabilities handle the “stochastic” nature of sports motion. The idea is that artificial intelligence (AI) observes, interprets, and learns the movement patterns, their connections and influences, remembers the history and evolution of patterns so that, equipped with this knowledge, the AI is able to forecast complex and dynamic (indeterministic) motion. Recently, Vaswani et al. [5] introduced the most prominent Transformer model that leverages the self-attention mechanism to increase the number of memorable time steps, thus surpassing traditional recurrent neural networks (RNNs) such as LSTMs [6] and LMU [7] w.r.t. accuracy and robustness. Transformers offer the advantages of convolutional networks (optimal feature extraction) and RNNs (memory) and are robust against very large input data spaces with very high information complexity and dimensionality. A well-known example of a Transformer-based model is Chat-GPT for natural language data processing [8] or TimeGPT for time series data processing [1]. However, there is currently no Transformer model for (multivariate and multi-task) forecasting of motion in sport.\\
+Forecasting methods for the stock market, electricity prices, or weather and climate are ubiquitous and are extensively researched [1]. However, forecasting human motion in sports is only sparsely researched. Here too, forecasting technology is crucial to compress system delays at an early stage, reduce injuries, achieve tactical advantages [2] and, in short, improve analysis before, during, and post-game [3]. For instance, coaches draw more effective decisions, such as switching players for health reasons due to irregular motion. The demand for forecasting methods is currently increasing with newly emerging communication platforms, e.g., 6G, and the Internet of Things (IoT). However, forecasting human motion, especially their positions, is a difficult task as human motion is practically indeterministic. Scenarios with fast and unpredictable human motion, e.g., in sports such as NBA basketball, render forecasting virtually impossible. So, experts explore forecasting models that can accurately, reliably, promptly, and as far as possible forecast people’s future motion in complex and dynamic environments. For this purpose, classic Bayesian methods such as Kalman and particle filters (KF, PF) [4] were developed. However, these linear models do not remember the motion history necessary to forecast more than just a single time step of the future. In sport, KF and PF are practically ineffective when people move with rapid changes in speed and acceleration and influence each other (tactically) during the course of the game. That is why promising AI approaches have recently been explored. These methods have the potential to exploit nonlinear patterns in dynamic, complex motion that even experts miss as their nonlinear learning capabilities handle the ``stochastic'' nature of sports motion. The idea is that artificial intelligence (AI) observes, interprets, and learns the movement patterns, their connections and influences, remembers the history and evolution of patterns so that, equipped with this knowledge, the AI is able to forecast complex and dynamic (indeterministic) motion. Recently, Vaswani et al. [5] introduced the most prominent Transformer model that leverages the self-attention mechanism to increase the number of memorable time steps, thus surpassing traditional recurrent neural networks (RNNs) such as LSTMs [6] and LMU [7] w.r.t. accuracy and robustness. Transformers offer the advantages of convolutional networks (optimal feature extraction) and RNNs (memory) and are robust against very large input data spaces with very high information complexity and dimensionality. A well-known example of a Transformer-based model is Chat-GPT for natural language data processing [8] or TimeGPT for time series data processing [1]. However, there is currently no Transformer model for (multivariate and multi-task) forecasting of motion in sport.\\
 \end{thesisbackground} 
 \begin{thesistask}
 The literature leaves it unclear why more memory of LMU and attention cells does not necessarily result in higher accuracy and robustness than LSTM cells. Therefore, the student will examine the performance of LSTM and LMU cells and Transformer (attention) architecture on NBA data and evaluate the impact of time scale, memory, and parameters on accuracy, robustness, uncertainty, and forecast horizon. Since previous work trained individual Transformer models for each pedestrian to estimate person-specific positions, the information-rich (social) context between pedestrians is lost. It is unclear how (social) interactions and contexts can be represented in Transformer models. It is also unclear how and whether Transformers lead to more accurate, robust, and comprehensive forecasts than the state-of-the-art. The student will thus explore various LSTM, LMU, classic Transformer, BitNet, and (optionally) RetNet models for multivariate and multi-task forecasting of motion in sports. The student investigates the effects of input dimensions (a single player up to a maximum of 10 NBA players per game) on the accuracy, robustness, uncertainty, and forecast horizon of Transformer-like models. Since it is also unclear how and whether precompiled Transformers such as TimeGPT can be adapted on multivariate and multi-tasking human movement forecasting in sports applications. The student will investigate whether and how we can define and generate input embeddings with at least two players so that TimeGPT may forecast at least the positions of a single player. The student will also examine the effects of splitting the position into univariate input embeddings, i.e., x- and y-coordinates, to forecast only x- and y-coordinates. He will compare different embeddings and optimizations of LSTM, LMU, a classic Transformer, TimeGPT, BitNet, and (optionally) RetNet and reports performance and computational complexity. The student will also examine how these models can be adapted or fine-tuned to sports motion. The student will conduct an ablation study that optimizes and evaluates all (possible) methods in terms of: velocity versus position input information; length of historical context versus forecast horizon; impact on the forecast horizon; training and inference time. For all benchmarks, the student employs at least the following metrics: Mean Absolute Error (MAE), Root Mean Square Error (RMSE), Average Displacement Error (ADE), and Final Displacement Error (FDE)[14]. A graphical evaluation compares the positioning results.
@@ -80,8 +85,14 @@ The literature leaves it unclear why more memory of LMU and attention cells does
 % https://www.ece.ucdavis.edu/~jowens/biberrors.html
 \addbibresource{references.bib}
 
+\DeclareNewTOC[listname={List of Equations},type=equation]{loe}
 
+\newcommand*{\setequationentry}[1]{%
+  \addxcontentsline{loe}{equation}[\theequation]{#1}%
+  \ignorespaces
+}
 
+\DeclareTOCStyleEntry[dynnumwidth]{default}{equation}
 %%%%%%%%%% DOCUMENT %%%%%%%%%%
 \begin{document}
 
@@ -99,14 +110,17 @@ The literature leaves it unclear why more memory of LMU and attention cells does
 
 \include{contents/0_abstract}
 
-\listoftodos
-
 \tableofcontents
-\listoffigures
-\listofalgorithms
 \listoftables
+\addcontentsline{toc}{chapter}{List of Tables}  % For books and reports
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+\listofalgorithms
+\listofequations
+\addcontentsline{toc}{chapter}{List of Equations}
 
 \include{contents/abbreviations}
+\printglossary[type=abbreviations, title={List of Abbreviations}]
 \include{contents/symbols}
 
 \setlength{\parindent}{0pt} % damit die Zeilen immer bei ganz links anfangen
@@ -118,10 +132,9 @@ The literature leaves it unclear why more memory of LMU and attention cells does
 \include{contents/4_methods}
 \include{contents/5_experimental_setup}
 \include{contents/6_results}
-\include{contents/7_discussion}
+%\include{contents/7_discussion}
 \include{contents/8_conclusion}
 \include{contents/9_outlook_fw}
 
-\printglossaries
 \printbibliography
 \end{document}

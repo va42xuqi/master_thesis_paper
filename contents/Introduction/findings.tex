@@ -1,0 +1,8 @@
+\section{Findings}
+\label{sec:findings}
+Our experiments demonstrate that attention-based models, particularly the Transformer, performed competitively across various settings in forecasting human motion for sports such as NBA basketball and DFL soccer. The Transformer model consistently achieved high accuracy, often rivaling the top-performing Legendre Memory Unit (LMU) and surpassing the LSTM in most cases. It also demonstrated robustness even when key input features, such as positional or velocity data, were excluded, maintaining competitive accuracy, unlike BitNet, which struggled without additional~parameters.
+
+However, attention-based models, including the Transformer, faced challenges when social context was missing, resulting in a general decrease in performance. Despite this limitation, the Transformer remained stable when faced with shorter historical contexts, showcasing its adaptability compared to recurrent models, which required longer input histories. In transfer learning tasks, the Transformer effectively adapted to new domains, highlighting its potential for generalization across different sports. Even though the absence of social context impacted accuracy, the Transformer still outperformed other models in predicting individual player~movements.
+
+Overall, while the LMU achieved the highest accuracy, the Transformer was a strong contender and showed potential to surpass traditional recurrent models with further~optimization.
+

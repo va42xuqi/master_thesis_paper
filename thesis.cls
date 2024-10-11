@@ -22,18 +22,12 @@
 \usepackage{pdfpages}
 \usepackage{tcolorbox}
 \usepackage{adjustbox}
-\usepackage{todonotes}
 \usepackage{fancyvrb}
 \usepackage{caption}
 \usepackage[abbreviations,symbols,nogroupskip,nonumberlist,shortcuts=true,style=super,automake, acronym]{glossaries-extra}
-
 \makeglossaries
 
-\newcommand{\listequationsname}{List of Equations}
-
-
 \captionsetup[algorithm]{name=Algorithm}
-
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
 
@@ -239,7 +233,6 @@
 
 \newsavebox{\TaskPageTaskBox} % Save task text
 \newenvironment{thesistask}{\global\setbox\TaskPageTaskBox\hbox\bgroup}{\egroup}
-
 \newtoks\TaskPageMilestones % Used to build milestone items
 \newtoggle{TaskPageMilestoneAdded} % Track whether milestone has been added
 

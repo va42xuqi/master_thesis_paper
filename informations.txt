@@ -1,0 +1,25 @@
+train split: 95 train - 5 validation 
+
+test split: 100 test 
+
+Soccer: 
+train+validation=2_786 trajectories / 4_194_182
+train=2646 trajectories
+validation=140 trajectories
+test=88 trajectories / 130_711
+
+test 1: 122_936 (*101)
+test 10: 122_144 (*110)
+test 25: 120_824 (*125)
+test 50: 118_624 (*150)
+
+NBA:
+train+validation=6365 / 2_131_840
+train=6047
+validation=318
+test=153 / 57_504
+
+test 1: 19_718 (*101)
+test 10: 18_341 (*110)
+test 25: 16_046 (*125)
+test 50: 12_221 (*150)

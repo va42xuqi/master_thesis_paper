@@ -1,6 +1,5 @@
-
 \glsxtrnewsymbol[description={Bias term for output \( x \)}]{bx}{\(b_x\)}
-\glsxtrnewsymbol[description={Weight matrix for output \( y \) from input \( x \)}]{Wxy}{\(W_{xy}\)}
+\glsxtrnewsymbol[description={Weight matrix mapping input \( x \) to output \( y \)}]{Wxy}{\(W_{xy}\)}
 \glsxtrnewsymbol[description={Sigmoid activation function}]{sigmoid}{\(\sigma\)}
 \glsxtrnewsymbol[description={Hidden state vector at time step \( t \)}]{h}{\(h_t\)}
 \glsxtrnewsymbol[description={Hyperbolic tangent activation function}]{tanh2}{\(\tanh\)}
@@ -11,10 +10,33 @@
 \glsxtrnewsymbol[description={Output gate at time step \( t \)}]{ot}{\(o_t\)}
 
 \glsxtrnewsymbol[description={Window length parameter}]{theta}{\(\theta\)}
+\glsxtrnewsymbol[description={Addition operator}]{addition}{$+$}
 
-\glsxtrnewsymbol[description={}]{}{}
+\glsxtrnewsymbol[description={Memory state at time step \( t \)}]{memory_state}{$m_t$}
+\glsxtrnewsymbol[description={Processed input of the LMU at time step \( t \)}]{ut}{$u_t$}
+\glsxtrnewsymbol[description={State space matrices}]{ab}{$A$, $B$}
+\glsxtrnewsymbol[description={Discrete state space matrices}]{dab}{$\Bar{A}$, $\Bar{B}$}
 
+\glsxtrnewsymbol[description={Activation function applied to vector \( x \)}]{f}{$f(x)$}
+\glsxtrnewsymbol[description={Model dimensionality (hidden size)}]{d_model}{$d_{model}$}
+
+\glsxtrnewsymbol[description={Query vector}]{q}{$Q$}
+\glsxtrnewsymbol[description={Key vector}]{k}{$K$}
+\glsxtrnewsymbol[description={Value vector}]{v}{$V$}
+
+\glsxtrnewsymbol[description={Sum over all entries \( j \) in the vector}]{sum}{$\sum_j$}
+
+\glsxtrnewsymbol[description={Mean of vector \( x \)}]{mean}{E[x]}
+\glsxtrnewsymbol[description={Variance of vector \( x \)}]{var}{Var[x]}
+\glsxtrnewsymbol[description={Machine epsilon for numerical stability}]{epsilon}{$\epsilon$}
+\glsxtrnewsymbol[description={Learnable shift parameter}]{beta}{$\beta$}
+\glsxtrnewsymbol[description={Learnable scale parameter}]{gamma}{$\gamma$}
+\glsxtrnewsymbol[description={Sign function (returns the sign of the input)}]{sign}{sign(x)}
+\glsxtrnewsymbol[description={Multiplication operator}]{times}{\times}
+\glsxtrnewsymbol[description={Difference in time}]{delta_t}{$\Delta t$}
+
+\glsxtrnewsymbol[description={2-norm of vector \( x \)}]{norm}{$\|x\|$}
+\glsxtrnewsymbol[description={Final time step for prediction}]{t_p}{$T_{pred}$}
+\glsxtrnewsymbol[description={Final time step for observation}]{t_o}{$T_{obs}$}
 
 \printunsrtglossary[type=symbols, title={List of Symbols}]
-
-\todo{glossary still in progress}
